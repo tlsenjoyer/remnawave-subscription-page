@@ -280,3 +280,25 @@ test('touch accordion and wizard', async ({ browser }) => {
     await expect(page.getByRole('dialog', { name: 'Connection setup' })).toBeVisible()
     await context.close()
 })
+
+test('Russian mobile setup actions wrap without clipping', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 })
+    await openPage(page, { locale: 'ru' })
+    await page.getByRole('button', { name: 'Подключить новое устройство', exact: true }).click()
+    await page.getByRole('button', { name: 'Приложение установлено, дальше' }).click()
+    const qr = page.getByRole('button', { name: /Показать QR-код/ })
+    await expect(qr).toBeVisible()
+    const clipped = await qr.evaluate((el) =>
+        [...el.querySelectorAll('span')].some(
+            (span) =>
+                span.scrollWidth > span.clientWidth + 1 || span.scrollHeight > span.clientHeight + 1
+        )
+    )
+    expect(clipped).toBe(false)
+    await qr.click()
+    await expect(
+        page.getByRole('img', {
+            name: 'Отсканируйте код в VPN-приложении, чтобы добавить подписку.'
+        })
+    ).toBeVisible()
+})

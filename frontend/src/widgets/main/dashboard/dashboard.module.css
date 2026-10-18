@@ -69,3 +69,15 @@
  .platform { font-size: 11px; }
  .supportInset { padding: 18px; }
 }
+/* Setup actions must remain readable in narrow viewports and long locales. */
+.wizardShell :global(.mantine-Button-root) {
+  height: auto;
+  min-height: 40px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+.wizardShell :global(.mantine-Button-label) {
+  white-space: normal;
+  line-height: 1.4;
+  text-align: center;
+}
