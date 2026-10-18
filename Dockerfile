@@ -1,4 +1,5 @@
-FROM node:24-bookworm-slim AS frontend-build
+ARG BUILDPLATFORM
+FROM --platform=${BUILDPLATFORM:-linux/amd64} node:24-bookworm-slim AS frontend-build
 WORKDIR /opt/frontend
 COPY frontend/package*.json ./
 COPY frontend/.npmrc ./
@@ -16,9 +17,9 @@ RUN NODE_ENV=production npm run build && npm run trace
 
 FROM node:24-bookworm-slim
 WORKDIR /opt/app
-ARG RELEASE_VERSION=1.0.0
+ARG RELEASE_VERSION=2.0.0
 ARG VCS_REF=unknown
-LABEL org.opencontainers.image.title="Green Remnawave Subscription Page" \
+LABEL org.opencontainers.image.title="Товарищ VPN Subscription Page" \
       org.opencontainers.image.description="Dark green subscription frontend with upstream Remnawave API compatibility" \
       org.opencontainers.image.url="https://github.com/tlsenjoyer/remnawave-subscription-page" \
       org.opencontainers.image.source="https://github.com/tlsenjoyer/remnawave-subscription-page" \

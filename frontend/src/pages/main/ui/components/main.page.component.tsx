@@ -1,133 +1,50 @@
 import { Box, Center, Container, Group, Image, Stack, Title } from '@mantine/core'
 import { TSubscriptionPagePlatformKey } from '@remnawave/subscription-page-types'
+import classes from '@widgets/main/dashboard/dashboard.module.css'
+import { DashboardWidget } from '@widgets/main/dashboard/dashboard.widget'
+import { TrafficSummaryWidget } from '@widgets/main/subscription-info/traffic-summary.widget'
 
-import {
-    AccordionBlockRenderer,
-    CardsBlockRenderer,
-    InstallationGuideConnector,
-    MinimalBlockRenderer,
-    RawKeysWidget,
-    SubscriptionInfoCardsWidget,
-    SubscriptionInfoCollapsedWidget,
-    SubscriptionInfoExpandedWidget,
-    SubscriptionLinkWidget,
-    TimelineBlockRenderer
-} from '@widgets/main'
-import { useAppConfig, useAppConfigStoreActions, useCurrentLang } from '@entities/app-config-store'
+import { Page } from '@shared/ui'
 import { LanguagePicker } from '@shared/ui/language-picker/language-picker.shared'
-import { Page, RemnawaveLogo } from '@shared/ui'
+
+import { useAppConfig, useAppConfigStoreActions, useCurrentLang } from '@entities/app-config-store'
 
 interface IMainPageComponentProps {
     isMobile: boolean
     platform: TSubscriptionPagePlatformKey | undefined
 }
-
-const BLOCK_RENDERERS = {
-    cards: CardsBlockRenderer,
-    timeline: TimelineBlockRenderer,
-    accordion: AccordionBlockRenderer,
-    minimal: MinimalBlockRenderer
-} as const
-
-const SUBSCRIPTION_INFO_BLOCK_RENDERERS = {
-    cards: SubscriptionInfoCardsWidget,
-    collapsed: SubscriptionInfoCollapsedWidget,
-    expanded: SubscriptionInfoExpandedWidget,
-    hidden: null
-} as const
-
 export const MainPageComponent = ({ isMobile, platform }: IMainPageComponentProps) => {
     const config = useAppConfig()
     const currentLang = useCurrentLang()
     const { setLanguage } = useAppConfigStoreActions()
-
-    const brandName = config.brandingSettings.title
-    let hasCustomLogo = !!config.brandingSettings.logoUrl
-
-    if (hasCustomLogo) {
-        if (config.brandingSettings.logoUrl.includes('docs.rw')) {
-            hasCustomLogo = false
-        }
-    }
-
-    const hasPlatformApps: Record<TSubscriptionPagePlatformKey, boolean> = {
-        ios: Boolean(config.platforms.ios?.apps.length),
-        android: Boolean(config.platforms.android?.apps.length),
-        linux: Boolean(config.platforms.linux?.apps.length),
-        macos: Boolean(config.platforms.macos?.apps.length),
-        windows: Boolean(config.platforms.windows?.apps.length),
-        androidTV: Boolean(config.platforms.androidTV?.apps.length),
-        appleTV: Boolean(config.platforms.appleTV?.apps.length)
-    }
-
-    const atLeastOnePlatformApp = Object.values(hasPlatformApps).some((value) => value)
-
-    const SubscriptionInfoBlockRenderer =
-        SUBSCRIPTION_INFO_BLOCK_RENDERERS[config.uiConfig.subscriptionInfoBlockType]
-
     return (
         <Page>
-            <Box className="header-wrapper" py="md">
-                <Container maw={1200} px={{ base: 'md', sm: 'lg', md: 'xl' }}>
-                    <Group justify="space-between">
-                        <Group gap="sm" style={{ userSelect: 'none' }} wrap="nowrap">
-                            {hasCustomLogo ? (
-                                <Image
-                                    alt="logo"
-                                    fit="contain"
-                                    src={config.brandingSettings.logoUrl}
-                                    style={{
-                                        width: '32px',
-                                        height: '32px',
-                                        flexShrink: 0
-                                    }}
-                                />
-                            ) : (
-                                <RemnawaveLogo c="green" size={32} />
-                            )}
-                            <Title
-                                c={hasCustomLogo ? 'white' : 'green'}
-                                fw={700}
-                                order={4}
-                                size="lg"
-                            >
-                                {brandName}
-                            </Title>
-                        </Group>
-
-                        <SubscriptionLinkWidget
-                            hideGetLink={config.baseSettings.hideGetLinkButton}
-                            supportUrl={config.brandingSettings.supportUrl}
+            <Box component="header" className={classes.header}>
+                <Container maw={900} px="md">
+                    <Group gap="sm" wrap="nowrap">
+                        <Image
+                            alt=""
+                            src={
+                                config.brandingSettings.logoUrl ||
+                                'https://s.812004.xyz/static/shield-icon.svg'
+                            }
+                            w={34}
+                            h={38}
+                            fit="contain"
                         />
+                        <Title order={1} size="lg" fw={700}>
+                            {config.brandingSettings.title || 'Товарищ VPN'}
+                        </Title>
                     </Group>
                 </Container>
             </Box>
-
-            <Container
-                maw={1200}
-                px={{ base: 'md', sm: 'lg', md: 'xl' }}
-                py="xl"
-                style={{ position: 'relative', zIndex: 1 }}
-            >
-                <Stack gap="xl">
-                    {SubscriptionInfoBlockRenderer && (
-                        <SubscriptionInfoBlockRenderer isMobile={isMobile} />
+            <Container component="main" maw={900} px="md" className={classes.main}>
+                <Stack gap="md">
+                    {config.uiConfig.subscriptionInfoBlockType !== 'hidden' && (
+                        <TrafficSummaryWidget variant="collapsed" />
                     )}
-
-                    {atLeastOnePlatformApp && (
-                        <InstallationGuideConnector
-                            BlockRenderer={
-                                BLOCK_RENDERERS[config.uiConfig.installationGuidesBlockType]
-                            }
-                            hasPlatformApps={hasPlatformApps}
-                            isMobile={isMobile}
-                            platform={platform}
-                        />
-                    )}
-
-                    <RawKeysWidget isMobile={isMobile} />
-
-                    <Center>
+                    <DashboardWidget platform={platform} isMobile={isMobile} />
+                    <Center component="footer" className={classes.footer}>
                         <LanguagePicker
                             currentLang={currentLang}
                             locales={config.locales}

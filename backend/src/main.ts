@@ -91,6 +91,8 @@ async function bootstrap(): Promise<void> {
     }
 
     app.use('/assets', cookieParser());
+    const devicesPrefix = config.get('CUSTOM_SUB_PREFIX');
+    app.use(`${devicesPrefix ? '/' + devicesPrefix : ''}/api/devices`, cookieParser());
     app.use('/assets', checkAssetsCookieMiddleware);
 
     app.use(noRobotsMiddleware, getRealIp, headerFilterMiddleware);

@@ -39,6 +39,7 @@ export const configSchema = z
 
         SUBPAGE_CONFIG_UUID: z.string().default('00000000-0000-0000-0000-000000000000'),
         CUSTOM_SUB_PREFIX: z.optional(z.string()),
+        SUPPORT_EMAIL: z.email().default('support@tovarish.net'),
 
         TRUST_PROXY: z
             .string()

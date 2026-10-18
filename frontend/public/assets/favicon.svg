@@ -1,8 +1,20 @@
-<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="6" fill="#1e293b"/>
-  <path d="M6 16C6 16 10 10 16 16C22 22 26 16 26 16" 
-        stroke="#3b82f6" 
-        stroke-width="4" 
-        stroke-linecap="round"
-        fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2D16B" />
+      <stop offset="50%" stop-color="#D4A017" />
+      <stop offset="100%" stop-color="#997000" />
+    </linearGradient>
+
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5C8366" />
+      <stop offset="100%" stop-color="#3A5340" />
+    </linearGradient>
+  </defs>
+
+  <path d="M100 10 C40 20 20 40 20 40 L20 120 C20 180 100 230 100 230 C100 230 180 180 180 120 L180 40 C180 40 160 20 100 10 Z" fill="#1A1A1A" />
+
+  <path d="M100 15 C45 25 25 43 25 43 L25 119 C25 175 100 222 100 222 C100 222 175 175 175 119 L175 43 C175 43 155 25 100 15 Z" fill="url(#goldGrad)" />
+
+  <path d="M100 25 C52 34 35 48 35 48 L35 118 C35 168 100 208 100 208 C100 208 165 168 165 118 L165 48 C165 48 148 34 100 25 Z" fill="url(#greenGrad)" />
 </svg>

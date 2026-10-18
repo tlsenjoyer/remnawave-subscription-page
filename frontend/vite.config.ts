@@ -18,6 +18,7 @@ export default defineConfig({
                 return {
                     root: viteConfig.root,
                     panelData: '<%- panelData %>',
+                    supportEmail: '<%= supportEmail %>',
                     metaDescription: '<%= metaDescription %>',
                     metaTitle: '<%= metaTitle %>'
                 }
@@ -25,6 +26,7 @@ export default defineConfig({
             return {
                 root: viteConfig.root,
                 panelData: process.env.PANEL_DATA,
+                supportEmail: process.env.SUPPORT_EMAIL || 'support@tovarish.net',
                 metaDescription: process.env.META_DESCRIPTION,
                 metaTitle: process.env.META_TITLE
             }

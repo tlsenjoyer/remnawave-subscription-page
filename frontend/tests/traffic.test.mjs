@@ -67,3 +67,62 @@ test('every supported locale has translated UI copy and reset schedules', () => 
     assert.equal(getResetCaption('NO_RESET', 'en'), 'No automatic reset')
     assert.equal(getTrafficCopy('xx').show, 'Show details')
 })
+
+import { SubscriptionPageRawConfigSchema } from '@remnawave/subscription-page-types'
+import { readFileSync } from 'node:fs'
+
+import { formatClientLink } from '../src/widgets/main/dashboard/client-link.ts'
+import { getDashboardCopy } from '../src/widgets/main/dashboard/dashboard-copy.ts'
+
+test('dashboard translations cover every supported locale and fall back to English', () => {
+    const english = getDashboardCopy('en')
+    for (const locale of LANGUAGE_CODES) {
+        const copy = getDashboardCopy(locale)
+        assert.deepEqual(Object.keys(copy), Object.keys(english))
+        assert.ok(
+            Object.values(copy).every((value) => typeof value === 'string' && value.length > 0)
+        )
+        if (locale !== 'en') {
+            for (const key of ['connect', 'deviceError', 'deviceHint', 'privateLink', 'preparing'])
+                assert.notEqual(copy[key], english[key], `${locale}.${key}`)
+        }
+    }
+    assert.deepEqual(getDashboardCopy('xx'), english)
+})
+test('client query imports encode reserved characters while path imports retain the URL', () => {
+    const url = 'https://example.com/sub/a?token=one&name=two#three'
+    assert.equal(
+        formatClientLink('clash://install-config?url={{SUBSCRIPTION_LINK}}', url),
+        'clash://install-config?url=' + encodeURIComponent(url)
+    )
+    assert.equal(
+        formatClientLink('incy://import/{{SUBSCRIPTION_LINK}}', url),
+        'incy://import/' + url
+    )
+    assert.equal(formatClientLink('{{USERNAME}}', url), '{{USERNAME}}')
+})
+test('importable panel configuration retains the schema and exact client matrix', () => {
+    const config = SubscriptionPageRawConfigSchema.parse(
+        JSON.parse(
+            readFileSync(new URL('../../config/tovarish-panel.json', import.meta.url), 'utf8')
+        )
+    )
+    const matrix = {
+        ios: ['incy', 'RabbitHole'],
+        android: ['incy', 'Happ', 'Clash Meta'],
+        windows: ['Koala Clash', 'Happ'],
+        macos: ['Koala Clash', 'Happ'],
+        linux: ['Koala Clash', 'Happ', 'Prizrak-Box'],
+        androidTV: ['Happ'],
+        appleTV: ['Happ']
+    }
+    assert.deepEqual(Object.keys(config.platforms), Object.keys(matrix))
+    for (const [platform, names] of Object.entries(matrix)) {
+        assert.deepEqual(
+            config.platforms[platform].apps.map((app) => app.name),
+            names
+        )
+        assert.equal(config.platforms[platform].apps.filter((app) => app.featured).length, 1)
+        for (const app of config.platforms[platform].apps) assert.equal(app.blocks.length, 3)
+    }
+})

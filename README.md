@@ -1,65 +1,92 @@
-# Green Remnawave Subscription Page
+# Товарищ VPN subscription page
 
-A dark green frontend for [Remnawave](https://github.com/remnawave/subscription-page), with a subtle square grid and traffic-first subscription summaries. The panel API, configuration schema, subscription links, authentication and proxy behavior remain compatible with the cloned upstream v8.0.0 baseline.
+A compact green subscription dashboard and guided connection flow for Remnawave. Fork release **v2.0.0**; the embedded upstream compatibility version remains **8.0.0**. Existing subscription routes, payloads, panel configuration schema, forwarding, and configuration-session behavior are retained. A separate read-only device API is added.
 
-Fork release: **v1.0.0**. Upstream package versions remain 8.0.0 because the backend embeds that compatibility version. The fork version is tracked independently in `RELEASE_VERSION`, Git tags and OCI image metadata.
+## Deployment
 
-## Deploy
-
-The image supports `linux/amd64` and `linux/arm64`:
+Public AMD64 and ARM64 image:
 
 ```text
-ghcr.io/tlsenjoyer/remnawave-subscription-page:v1.0.0
+ghcr.io/tlsenjoyer/remnawave-subscription-page:v2.0.0
 ```
 
-Copy `.env.sample` to `.env`, set `REMNAWAVE_PANEL_URL` and `REMNAWAVE_API_TOKEN`, and attach the service to the same Docker network as your panel. `docker-compose-prod.yml` retains the upstream `remnawave-network` external network and loopback-only port 3010.
+1. Copy `.env.sample` to `.env`. Set `REMNAWAVE_PANEL_URL`, `REMNAWAVE_API_TOKEN`, and `SUPPORT_EMAIL=support@tovarish.net`.
+2. In the Remnawave subscription-page editor, import **`config/tovarish-panel.json`**. It uses the existing schema and contains the seven-platform client matrix, editable download/import instructions, branding, and Russian/English translations. Back up your previous panel configuration first.
+3. Grant the panel API token its existing subscription/config permissions plus **Users: get by username** (`users`, `by-username`) and **HWID user devices: list by user** (`hwid-user-devices`, `list-by-user`). No device mutation permission is needed. If your panel version cannot scope tokens this way, use its equivalent read permissions.
+4. Keep your HTTPS reverse proxy, `X-Forwarded-For`, `X-Forwarded-Proto: https`, appropriate `TRUST_PROXY`, existing custom prefix, and external `remnawave-network` Docker network.
+5. Deploy:
 
 ```sh
 docker compose -f docker-compose-prod.yml pull
 docker compose -f docker-compose-prod.yml up -d
 ```
 
-Keep the existing HTTPS reverse proxy in front of the service, forwarding `X-Forwarded-For` and `X-Forwarded-Proto: https`. Configure `TRUST_PROXY` to match your deployment. Existing environment variables, custom subscription prefixes, Marzban compatibility and panel configuration selection remain available. The internal `/internal/health` endpoint is deliberately restricted to loopback and is used by Docker's health check.
+The panel configuration is loaded **at startup**. Restart the subscription container after changing it. Missing device permissions affect only the device modal; the subscription and connection guide remain usable.
 
-To build locally from a clean checkout:
+## Panel content and guided layout
 
-```sh
-docker compose build
+Branding title/logo, Telegram support URL, platform/client entries, translations, SVGs and instructions remain editable in the panel. Set the title to **Товарищ VPN**, logo to `https://s.812004.xyz/static/shield-icon.svg`, and support URL to `https://t.me/tovarishvpnbot`. Email is deployment configuration because the panel schema has no email field. It is public contact information, never a secret.
+
+The new frontend uses one presentation: traffic, connection, devices, support. Legacy `cards`, `expanded`, and `collapsed` subscription values all render the compact expandable traffic card; `hidden` still hides it. Installation-guide presentation selectors remain accepted but no longer select a visual layout. `showConnectionKeys` still controls raw keys, now inside the wizard. `hideGetLinkButton` no longer has a standalone header button to control; the subscription copy and QR fallback remain part of setup.
+
+For each platform, the first app marked `featured` is recommended and selected; if none is featured, the first app is selected. Each app uses ordered instruction blocks:
+
+1. Installation and download buttons.
+2. Subscription import instructions/buttons.
+3. How to enable VPN. Additional blocks appear after import instructions.
+
+Do not put all steps in one block. Existing button types and `{{SUBSCRIPTION_LINK}}`, `{{USERNAME}}`, and Happ cryptographic templates remain supported; usernames are never shown separately in the page. Subscription URLs placed in a deep-link query parameter are encoded by the new renderer. Path-style imports retain their original URL format.
+
+| Platform | Recommended | Alternatives |
+| --- | --- | --- |
+| iPhone / iPad | incy | RabbitHole |
+| Android | incy | Happ, Clash Meta |
+| Windows | Koala Clash | Happ |
+| macOS | Koala Clash | Happ |
+| Linux | Koala Clash | Happ, Prizrak-Box |
+| Android TV | Happ | — |
+| Apple TV | Happ | — |
+
+Regenerate the schema-validated panel file with `node scripts/generate-panel-config.mjs` after installing frontend dependencies. This file is an importable template; the deployed page continues to read the panel, not the checked-in template. English and Russian are enabled in the template. Additional panel locales need localized panel text; new frontend labels have translations and English fallback.
+
+Official client sources used for download/import configuration:
+
+- [incy downloads](https://github.com/INCY-DEV/incy-platforms) and [deep links](https://github.com/INCY-DEV/incy-docs/blob/main/ru/dev-docs/deep-links.en.md).
+- [Koala Clash](https://github.com/coolcoala/koala-clash), including its registered `koala-clash` scheme and import handler.
+- [Happ](https://github.com/Happ-proxy/happ-android) and [desktop releases](https://github.com/Happ-proxy/happ-desktop/releases).
+- [Clash Meta for Android](https://github.com/MetaCubeX/ClashMetaForAndroid), including its documented `clashmeta://install-config` scheme.
+- [Prizrak-Box installation](https://docs.prizrak.app/install/) and [deep-link documentation](https://github.com/legiz-ru/Prizrak-Box/blob/v3/doc/README.en.md).
+- [RabbitHole App Store listing](https://apps.apple.com/app/rabbithole-vpn-client/id6683309629), which documents URL/clipboard/QR import. RabbitHole deliberately uses manual URL import here; an undocumented deep link is not assumed.
+
+Downloads for desktop clients open official release/package selection pages, avoiding guesses about processor architecture. The incy Android APK fallback is explicitly versioned; update it in the panel as required. TV setup can be performed from a phone with instructions completed on the TV. Native app installation and real VPN connectivity must be checked on actual supported devices; browser completion does not verify a connection.
+
+## Traffic and connection behavior
+
+Bandwidth translations are **LTE трафик** / **LTE traffic**. Raw-byte math, localized quota amounts, the green/amber/red thresholds at 80% and 100%, unlimited usage, actual overage amounts, reset schedules, exact-byte tooltip and explicit subscription states are preserved. Expansion shows status and expiry, including indefinite expiry. Username data remains internal for existing link templates.
+
+The fullscreen wizard offers installation, import/enablement, and completion. Back preserves selection. Reopening starts at installation while remembering the selected app/platform for this page session. Inactive users may set up an app with a clear warning. Copy, QR, and advanced raw keys live in the wizard. There is no IP test, automatic connection verdict, payment, renewal, or device-deletion feature.
+
+## Read-only device API
+
+`GET /api/devices`, or `/<CUSTOM_SUB_PREFIX>/api/devices`, returns:
+
+```json
+{
+  "total": 1,
+  "limit": 5,
+  "devices": [{
+    "platform": "Android",
+    "osVersion": "16",
+    "deviceModel": "Phone",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-10-01T00:00:00.000Z"
+  }]
+}
 ```
 
-Both the frontend and backend are built inside Docker; no local `dist` folder is required. Panel URLs and tokens are runtime configuration and must never be baked into an image.
+A valid subscription page issues a separate 30-minute `device_session` signed cookie, restricted to the device route, `HttpOnly`, `SameSite=Lax`, and `Secure` in production. It has its own JWT audience and subscription subject; the existing shared configuration session cannot authorize it. The server re-resolves the subscription owner and checks the current short UUID on every request. The request must include `X-Subscription-Id` matching the signed subject, preventing a different subscription tab from displaying the wrong devices. Browser-supplied user IDs are ignored. Invalid/expired device authorization returns 401; unavailable panel data/permissions return 503. Responses are `Cache-Control: no-store`. Hardware IDs, panel credentials, user agents and IP addresses are not returned. A null or zero allowance is displayed as no device limit. Registered devices are not labeled online; update dates are not presented as last connection times.
 
-## Configure content in the panel
-
-Use the existing subscription-page editor in Remnawave. Branding, logo, support link, instructions, application/platform options, SVG icons, explicit icon colors, translations, visibility switches and layout choices still come from the panel.
-
-Set the existing **Bandwidth** translation field to:
-
-| Language | Value |
-| --- | --- |
-| Russian | LTE трафик |
-| English | LTE traffic |
-
-Other languages can use your preferred heading in the same field. Status, expiry and existing labels use their panel translations. New interface labels (reset captions, expand/collapse hints, unlimited usage, limited/disabled states and exact byte details) have built-in translations for all 20 supported locales, with English fallback; they do not add fields to the API.
-
-The backend loads panel configurations **at startup**, just as upstream does. After changing page configuration in the panel, restart this service and reload the page:
-
-```sh
-docker compose -f docker-compose-prod.yml restart
-```
-
-## Traffic summary
-
-All visible subscription-information layouts show traffic rather than username. Username data remains available internally for existing `{{USERNAME}}` link templates.
-
-- The bar uses raw byte counters, stays green below 80%, amber from 80%, and red at or above 100%. Over-limit totals are shown without truncation; only the bar is capped.
-- Quota sizes use powers of 1024, matching Remnawave's quota convention, with localized MB/GB labels and decimal separators. Zero is `0 MB` / `0 МБ`; nonzero values have one decimal.
-- Hover, focus or tap the amount to see the exact byte counters. Unlimited subscriptions show `used / ∞`, an unlimited label and an empty neutral track.
-- The reset caption follows the API's daily, weekly, monthly or no-reset strategy. Both monthly strategies say “Resets monthly” / “Сброс ежемесячно”; there is no invented reset countdown.
-- Active, expired, limited and disabled states are always explicitly labeled, independently of traffic usage. Unavailable states also change the card's outline/surface.
-- The collapsed variant opens with a pointer, Enter or Space and reveals only status and expiry date. Expanded and cards variants show those details immediately; hidden remains hidden. Indefinite expiry retains upstream handling.
-
-## Development and checks
+## Development and verification
 
 Use Node.js 24 and the committed lockfiles:
 
@@ -74,7 +101,7 @@ npm run test:e2e
 npm run start:build
 ```
 
-For a local preview with synthetic data (no panel or credentials), run `node tests/dev-server.mjs` from `frontend` and open `http://127.0.0.1:3334/demo`. This fixture server is not included in the production image. To develop against real panel responses, retain upstream's `PANEL_DATA` and app-config loading conventions.
+Preview synthetic data with `node tests/dev-server.mjs` from `frontend`, then open `http://127.0.0.1:3334/demo`. No panel credentials or real user data are required. The fixture server is excluded from production.
 
 ```sh
 cd backend
@@ -84,26 +111,23 @@ npm run lint
 NODE_ENV=production npm run build
 ```
 
-From the repository root, run production compatibility checks against a schema-validated mock panel:
+Production container validation from the repository root:
 
 ```sh
 docker build -t green-subpage:test .
 node scripts/compatibility-smoke.mjs --docker green-subpage:test
 ```
 
-The smoke test uses a temporary container with host networking on Linux. It verifies the browser hydration payload, panel config response, assets/session checks, custom prefix routing, raw subscription bytes and headers, credential handling, HTTPS proxy requirement, and Docker health check. Browser tests cover layout selection, localization, thresholds, expansion, supported application interactions and responsive/RTL screenshots. No real user data or panel API token is required.
+BuildKit automatically supplies `BUILDPLATFORM`; legacy builders default the frontend compiler to AMD64. On a legacy ARM64 builder, pass `--build-arg BUILDPLATFORM=linux/arm64`. The frontend is built once on the build host for both image architectures. Runtime architecture and backend dependencies remain target-specific. Docker builds both applications from clean sources; secrets and local dependencies are excluded.
 
-## Release
+The production mock-panel smoke verifies unchanged hydration/config responses, subscription forwarding, credentials, proxy/prefix behavior and health; it also checks separate device authorization, owner isolation, expired cookies, missing permissions, revoked links, empty lists, limits, and private metadata exclusion. Browser tests exercise all seven platforms, alternatives, back/reopen, support, copy/QR, visibility, and responsive/RTL/reduced-motion behavior.
 
-Pull requests and `main` run checks. Only stable `vX.Y.Z` tags publish containers; development images are not published.
+## Release and rollback
 
-1. Update `RELEASE_VERSION` and the pinned image in deployment examples for a new release. Leave upstream compatibility package versions unchanged unless deliberately adopting a new upstream baseline.
-2. Commit and push the validated changes, then push a matching tag, starting with `v1.0.0`.
-3. GitHub Actions repeats the checks, builds AMD64 and ARM64 images, and publishes the version tag plus `latest` to GHCR using its built-in `GITHUB_TOKEN` (`contents: read`, `packages: write`). Docker Hub, Telegram and personal deployment tokens are not used.
-4. On the first publication, open the package settings on GitHub and set visibility to **Public**. Verify an anonymous pull and inspect the manifest for both architectures.
+PRs and main run validation. Stable `vX.Y.Z` tags publish AMD64/ARM64 manifests to GHCR using `GITHUB_TOKEN`; the tag must match `RELEASE_VERSION`. v2.0.0 and `latest` use the same release image. The upstream embedded compatibility version remains independent. Verify the public manifest and an anonymous pull after publication.
 
-Deploy using a version tag or recorded image digest. Before upgrading, retain the previous digest; rollback by restoring that image in Compose and recreating the service. Application readiness is reported by Docker's health check and startup logs.
+Keep the v1.0.0 image and your old panel configuration for rollback. Restore both, then recreate/restart the container. No database migration is introduced. Health and startup logs confirm readiness; device failures remain visible in the modal with retry and support.
 
 ## Upstream and license
 
-Derived from [remnawave/subscription-page](https://github.com/remnawave/subscription-page), baseline commit `2a125d180240bb4f373871daf1100f9bb0e2ae3f` (upstream v8.0.0). Upstream authorship and the existing [AGPL-3.0-only license](LICENCE) are retained. Source for this fork is available at [tlsenjoyer/remnawave-subscription-page](https://github.com/tlsenjoyer/remnawave-subscription-page).
+Derived from [remnawave/subscription-page](https://github.com/remnawave/subscription-page), baseline `2a125d180240bb4f373871daf1100f9bb0e2ae3f` (v8.0.0). Upstream attribution and [AGPL-3.0-only license](LICENCE) are retained. Fork source: [tlsenjoyer/remnawave-subscription-page](https://github.com/tlsenjoyer/remnawave-subscription-page).

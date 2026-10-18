@@ -13,15 +13,18 @@ import { MarzbanService } from './marzban.service';
 })
 export class MarzbanModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(MarzbanMiddleware).exclude('/assets/*splat').forRoutes(
-            {
-                path: ':shortUuid',
-                method: RequestMethod.GET,
-            },
-            {
-                path: ':shortUuid/:clientType',
-                method: RequestMethod.GET,
-            },
-        );
+        consumer
+            .apply(MarzbanMiddleware)
+            .exclude('/assets/*splat', { path: 'api/devices', method: RequestMethod.GET })
+            .forRoutes(
+                {
+                    path: ':shortUuid',
+                    method: RequestMethod.GET,
+                },
+                {
+                    path: ':shortUuid/:clientType',
+                    method: RequestMethod.GET,
+                },
+            );
     }
 }

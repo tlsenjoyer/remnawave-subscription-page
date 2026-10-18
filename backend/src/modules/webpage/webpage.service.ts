@@ -228,11 +228,29 @@ export class WebpageService implements OnApplicationBootstrap {
                 maxAge: 1_800_000, // 30 minutes
             });
 
+            // Separate authorization from the existing shared configuration session.
+            const prefix = this.configService.get('CUSTOM_SUB_PREFIX');
+            res.cookie(
+                'device_session',
+                this.jwtService.sign(
+                    { sub: shortUuid },
+                    { audience: 'subscription-devices', expiresIn: '30m' },
+                ),
+                {
+                    httpOnly: true,
+                    secure: !isDevelopment(),
+                    sameSite: 'lax',
+                    path: `${prefix ? '/' + prefix : ''}/api/devices`,
+                    maxAge: 1_800_000,
+                },
+            );
+
             res.type('html').send(
                 this.indexTemplate({
                     metaTitle: baseSettings.metaTitle,
                     metaDescription: baseSettings.metaDescription,
                     panelData: Buffer.from(JSON.stringify(subscriptionData)).toString('base64'),
+                    supportEmail: this.configService.getOrThrow('SUPPORT_EMAIL'),
                 }),
             );
         } catch (error) {

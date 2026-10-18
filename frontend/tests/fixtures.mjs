@@ -1,116 +1,26 @@
 import { GetSubscriptionInfoByShortUuidCommand } from '@remnawave/backend-contract'
-import {
-    BASE_TRANSLATION_LABELS,
-    LANGUAGE_CODES,
-    SubscriptionPageRawConfigSchema
-} from '@remnawave/subscription-page-types'
-
-const localized = (en, ru = en) =>
-    Object.fromEntries(LANGUAGE_CODES.map((locale) => [locale, locale === 'ru' ? ru : en]))
-const translations = Object.fromEntries(
-    Object.entries(BASE_TRANSLATION_LABELS).map(([key, label]) => [key, localized(label)])
+import { SubscriptionPageRawConfigSchema, LANGUAGE_CODES } from '@remnawave/subscription-page-types'
+import { readFileSync } from 'node:fs'
+const panelConfig = JSON.parse(
+    readFileSync(new URL('../../config/tovarish-panel.json', import.meta.url), 'utf8')
 )
-Object.assign(translations, {
-    bandwidth: localized('LTE traffic', 'LTE трафик'),
-    active: localized('Active', 'Активна'),
-    expired: localized('Expired', 'Истекла'),
-    status: localized('Status', 'Статус'),
-    expires: localized('Expiry date', 'Дата окончания'),
-    indefinitely: localized('Indefinitely', 'Бессрочно'),
-    installationGuideHeader: localized('Connect your device', 'Подключить устройство'),
-    connectionKeysHeader: localized('Connection keys', 'Ключи подключения'),
-    getLink: localized('Get link', 'Получить ссылку'),
-    copyLink: localized('Copy link', 'Скопировать ссылку')
-})
-const icon =
-    '<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M10 18h4"/></svg>'
-const apps = [
-    {
-        name: 'Happ',
-        featured: true,
-        svgIconKey: 'device',
-        blocks: [
-            {
-                title: localized('Install the app', 'Установите приложение'),
-                description: localized(
-                    'Install the application for your device, then import your subscription.',
-                    'Установите приложение на устройство, затем добавьте подписку.'
-                ),
-                svgIconKey: 'device',
-                svgIconColor: 'violet',
-                buttons: [
-                    {
-                        type: 'external',
-                        link: 'https://example.com/download',
-                        text: localized('Download', 'Скачать'),
-                        svgIconKey: 'device'
-                    },
-                    {
-                        type: 'copyButton',
-                        link: '{{SUBSCRIPTION_LINK}}',
-                        text: localized('Copy subscription', 'Копировать подписку'),
-                        svgIconKey: 'device'
-                    },
-                    {
-                        type: 'subscriptionLink',
-                        link: 'happ://add/{{SUBSCRIPTION_LINK}}',
-                        text: localized('Import subscription', 'Добавить подписку'),
-                        svgIconKey: 'device'
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        name: 'Hiddify',
-        featured: false,
-        svgIconKey: 'device',
-        blocks: [
-            {
-                title: localized('Alternative app'),
-                description: localized('Alternative instructions'),
-                svgIconKey: 'device',
-                svgIconColor: '#e986bf',
-                buttons: []
-            }
-        ]
-    }
-]
-
-export function makeConfig(overrides = {}) {
-    return SubscriptionPageRawConfigSchema.parse({
-        version: '1',
-        locales: ['en', 'ru', 'fa'],
-        brandingSettings: {
-            title: 'Subscription',
-            logoUrl: '',
-            supportUrl: 'https://example.com/support'
-        },
-        uiConfig: { subscriptionInfoBlockType: 'collapsed', installationGuidesBlockType: 'cards' },
-        baseSettings: {
-            metaTitle: 'Subscription',
-            metaDescription: 'Subscription access',
-            showConnectionKeys: true,
-            hideGetLinkButton: false
-        },
-        baseTranslations: translations,
-        svgLibrary: { device: icon },
-        platforms: Object.fromEntries(
-            ['ios', 'android', 'windows', 'macos', 'linux', 'androidTV', 'appleTV'].map(
-                (platform) => [
-                    platform,
-                    {
-                        displayName: localized(platform),
-                        svgIconKey: 'device',
-                        apps: structuredClone(apps)
-                    }
-                ]
-            )
-        ),
-        ...overrides
-    })
+function extendLocales(value) {
+    if (!value || typeof value !== 'object') return value
+    if (typeof value.en === 'string')
+        return Object.fromEntries(
+            LANGUAGE_CODES.map((locale) => [locale, value[locale] || value.en])
+        )
+    if (Array.isArray(value)) return value.map(extendLocales)
+    return Object.fromEntries(
+        Object.entries(value).map(([key, item]) => [key, extendLocales(item)])
+    )
 }
-
+export function makeConfig(overrides = {}) {
+    const config = extendLocales(structuredClone(panelConfig))
+    config.locales = LANGUAGE_CODES
+    config.baseSettings.showConnectionKeys = true
+    return SubscriptionPageRawConfigSchema.parse({ ...config, ...overrides })
+}
 export function makeSubscription(overrides = {}) {
     const response = {
         isFound: true,

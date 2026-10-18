@@ -1,0 +1,1120 @@
+{
+  "version": "1",
+  "locales": [
+    "ru",
+    "en"
+  ],
+  "brandingSettings": {
+    "title": "Товарищ VPN",
+    "logoUrl": "https://s.812004.xyz/static/shield-icon.svg",
+    "supportUrl": "https://t.me/tovarishvpnbot"
+  },
+  "uiConfig": {
+    "subscriptionInfoBlockType": "collapsed",
+    "installationGuidesBlockType": "cards"
+  },
+  "baseSettings": {
+    "metaTitle": "Товарищ VPN",
+    "metaDescription": "Ваша подписка Товарищ VPN",
+    "showConnectionKeys": false,
+    "hideGetLinkButton": false
+  },
+  "baseTranslations": {
+    "installationGuideHeader": {
+      "en": "Connection setup",
+      "ru": "Настройка подключения"
+    },
+    "connectionKeysHeader": {
+      "en": "Connection keys",
+      "ru": "Ключи подключения"
+    },
+    "linkCopied": {
+      "en": "Link copied",
+      "ru": "Ссылка скопирована"
+    },
+    "linkCopiedToClipboard": {
+      "en": "The link has been copied to your clipboard.",
+      "ru": "Ссылка скопирована в буфер обмена."
+    },
+    "getLink": {
+      "en": "Get link",
+      "ru": "Получить ссылку"
+    },
+    "scanQrCode": {
+      "en": "QR code",
+      "ru": "QR-код"
+    },
+    "scanQrCodeDescription": {
+      "en": "Scan in your VPN app.",
+      "ru": "Отсканируйте в VPN-приложении."
+    },
+    "copyLink": {
+      "en": "Copy link",
+      "ru": "Скопировать ссылку"
+    },
+    "name": {
+      "en": "Name",
+      "ru": "Имя"
+    },
+    "status": {
+      "en": "Status",
+      "ru": "Статус"
+    },
+    "active": {
+      "en": "Active",
+      "ru": "Активна"
+    },
+    "inactive": {
+      "en": "Inactive",
+      "ru": "Неактивна"
+    },
+    "expires": {
+      "en": "Expiry date",
+      "ru": "Дата окончания"
+    },
+    "bandwidth": {
+      "en": "LTE traffic",
+      "ru": "LTE трафик"
+    },
+    "scanToImport": {
+      "en": "Scan to import",
+      "ru": "Отсканируйте для добавления"
+    },
+    "expiresIn": {
+      "en": "Expires in",
+      "ru": "Истекает через"
+    },
+    "expired": {
+      "en": "Expired",
+      "ru": "Истекла"
+    },
+    "unknown": {
+      "en": "Unknown",
+      "ru": "Неизвестно"
+    },
+    "indefinitely": {
+      "en": "Indefinitely",
+      "ru": "Бессрочно"
+    }
+  },
+  "svgLibrary": {
+    "device": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><rect x=\"5\" y=\"2\" width=\"14\" height=\"20\" rx=\"3\"/><path d=\"M10 18h4\"/></svg>",
+    "desktop": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><rect x=\"2\" y=\"3\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M8 21h8m-4-4v4\"/></svg>"
+  },
+  "platforms": {
+    "ios": {
+      "displayName": {
+        "en": "iPhone / iPad",
+        "ru": "iPhone / iPad"
+      },
+      "svgIconKey": "device",
+      "apps": [
+        {
+          "name": "incy",
+          "featured": true,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install incy",
+                "ru": "Установите incy"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://apps.apple.com/ru/app/incy/id6756943388",
+                  "type": "external",
+                  "text": {
+                    "en": "Download incy",
+                    "ru": "Скачать incy"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to incy",
+                "ru": "Добавьте в incy"
+              },
+              "description": {
+                "en": "Click the button to open incy and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть incy, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "incy://import/{{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to incy",
+                    "ru": "Добавить в incy"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open incy, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте incy, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        },
+        {
+          "name": "RabbitHole",
+          "featured": false,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install RabbitHole",
+                "ru": "Установите RabbitHole"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://apps.apple.com/app/rabbithole-vpn-client/id6683309629",
+                  "type": "external",
+                  "text": {
+                    "en": "Download RabbitHole",
+                    "ru": "Скачать RabbitHole"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to RabbitHole",
+                "ru": "Добавьте в RabbitHole"
+              },
+              "description": {
+                "en": "Copy the subscription link. Open RabbitHole, add a configuration from a URL, and paste the copied link. You can also scan the QR code inside the app.",
+                "ru": "Скопируйте ссылку подписки. Откройте RabbitHole, добавьте конфигурацию по URL и вставьте скопированную ссылку. Также можно отсканировать QR-код в приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "{{SUBSCRIPTION_LINK}}",
+                  "type": "copyButton",
+                  "text": {
+                    "en": "Copy for RabbitHole",
+                    "ru": "Скопировать для RabbitHole"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open RabbitHole, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте RabbitHole, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        }
+      ]
+    },
+    "android": {
+      "displayName": {
+        "en": "Android",
+        "ru": "Android"
+      },
+      "svgIconKey": "device",
+      "apps": [
+        {
+          "name": "incy",
+          "featured": true,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install incy",
+                "ru": "Установите incy"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://play.google.com/store/apps/details?id=llc.itdev.incy",
+                  "type": "external",
+                  "text": {
+                    "en": "Download incy",
+                    "ru": "Скачать incy"
+                  },
+                  "svgIconKey": "device"
+                },
+                {
+                  "link": "https://github.com/INCY-DEV/incy-platforms/releases/download/android-v3.7.0/Incy.apk",
+                  "type": "external",
+                  "text": {
+                    "en": "Download APK",
+                    "ru": "Скачать APK"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to incy",
+                "ru": "Добавьте в incy"
+              },
+              "description": {
+                "en": "Click the button to open incy and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть incy, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "incy://import/{{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to incy",
+                    "ru": "Добавить в incy"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open incy, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте incy, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        },
+        {
+          "name": "Happ",
+          "featured": false,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Happ",
+                "ru": "Установите Happ"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://play.google.com/store/apps/details?id=com.happproxy",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Happ",
+                    "ru": "Скачать Happ"
+                  },
+                  "svgIconKey": "device"
+                },
+                {
+                  "link": "https://github.com/Happ-proxy/happ-android/releases/latest/download/Happ.apk",
+                  "type": "external",
+                  "text": {
+                    "en": "Download APK",
+                    "ru": "Скачать APK"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Happ",
+                "ru": "Добавьте в Happ"
+              },
+              "description": {
+                "en": "Click the button to open Happ and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Happ, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "happ://add/{{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Happ",
+                    "ru": "Добавить в Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Happ, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Happ, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        },
+        {
+          "name": "Clash Meta",
+          "featured": false,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Clash Meta",
+                "ru": "Установите Clash Meta"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://github.com/MetaCubeX/ClashMetaForAndroid/releases/latest",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Clash Meta",
+                    "ru": "Скачать Clash Meta"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Clash Meta",
+                "ru": "Добавьте в Clash Meta"
+              },
+              "description": {
+                "en": "Click the button to open Clash Meta and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Clash Meta, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "clashmeta://install-config?url={{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Clash Meta",
+                    "ru": "Добавить в Clash Meta"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Clash Meta, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Clash Meta, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        }
+      ]
+    },
+    "windows": {
+      "displayName": {
+        "en": "Windows",
+        "ru": "Windows"
+      },
+      "svgIconKey": "desktop",
+      "apps": [
+        {
+          "name": "Koala Clash",
+          "featured": true,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Koala Clash",
+                "ru": "Установите Koala Clash"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://github.com/coolcoala/koala-clash/releases/latest",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Koala Clash",
+                    "ru": "Скачать Koala Clash"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Koala Clash",
+                "ru": "Добавьте в Koala Clash"
+              },
+              "description": {
+                "en": "Click the button to open Koala Clash and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Koala Clash, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "koala-clash://install-config?url={{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Koala Clash",
+                    "ru": "Добавить в Koala Clash"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Koala Clash, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Koala Clash, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        },
+        {
+          "name": "Happ",
+          "featured": false,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Happ",
+                "ru": "Установите Happ"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://github.com/Happ-proxy/happ-desktop/releases/latest",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Happ",
+                    "ru": "Скачать Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Happ",
+                "ru": "Добавьте в Happ"
+              },
+              "description": {
+                "en": "Click the button to open Happ and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Happ, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "happ://add/{{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Happ",
+                    "ru": "Добавить в Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Happ, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Happ, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        }
+      ]
+    },
+    "macos": {
+      "displayName": {
+        "en": "macOS",
+        "ru": "macOS"
+      },
+      "svgIconKey": "desktop",
+      "apps": [
+        {
+          "name": "Koala Clash",
+          "featured": true,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Koala Clash",
+                "ru": "Установите Koala Clash"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://github.com/coolcoala/koala-clash/releases/latest",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Koala Clash",
+                    "ru": "Скачать Koala Clash"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Koala Clash",
+                "ru": "Добавьте в Koala Clash"
+              },
+              "description": {
+                "en": "Click the button to open Koala Clash and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Koala Clash, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "koala-clash://install-config?url={{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Koala Clash",
+                    "ru": "Добавить в Koala Clash"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Koala Clash, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Koala Clash, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        },
+        {
+          "name": "Happ",
+          "featured": false,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Happ",
+                "ru": "Установите Happ"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://github.com/Happ-proxy/happ-desktop/releases/latest",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Happ",
+                    "ru": "Скачать Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Happ",
+                "ru": "Добавьте в Happ"
+              },
+              "description": {
+                "en": "Click the button to open Happ and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Happ, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "happ://add/{{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Happ",
+                    "ru": "Добавить в Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Happ, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Happ, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "displayName": {
+        "en": "Linux",
+        "ru": "Linux"
+      },
+      "svgIconKey": "desktop",
+      "apps": [
+        {
+          "name": "Koala Clash",
+          "featured": true,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Koala Clash",
+                "ru": "Установите Koala Clash"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://github.com/coolcoala/koala-clash/releases/latest",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Koala Clash",
+                    "ru": "Скачать Koala Clash"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Koala Clash",
+                "ru": "Добавьте в Koala Clash"
+              },
+              "description": {
+                "en": "Click the button to open Koala Clash and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Koala Clash, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "koala-clash://install-config?url={{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Koala Clash",
+                    "ru": "Добавить в Koala Clash"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Koala Clash, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Koala Clash, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        },
+        {
+          "name": "Happ",
+          "featured": false,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Happ",
+                "ru": "Установите Happ"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://github.com/Happ-proxy/happ-desktop/releases/latest",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Happ",
+                    "ru": "Скачать Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Happ",
+                "ru": "Добавьте в Happ"
+              },
+              "description": {
+                "en": "Click the button to open Happ and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Happ, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "happ://add/{{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Happ",
+                    "ru": "Добавить в Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Happ, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Happ, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        },
+        {
+          "name": "Prizrak-Box",
+          "featured": false,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Prizrak-Box",
+                "ru": "Установите Prizrak-Box"
+              },
+              "description": {
+                "en": "Download the app for your device, install it, and open it. On desktop, select the package for your operating system and processor. Allow the VPN permission when prompted.",
+                "ru": "Скачайте приложение для своего устройства, установите и откройте его. На компьютере выберите пакет для своей системы и процессора. Разрешите создание VPN-подключения, если приложение запросит доступ."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://docs.prizrak.app/install/",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Prizrak-Box",
+                    "ru": "Скачать Prizrak-Box"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Prizrak-Box",
+                "ru": "Добавьте в Prizrak-Box"
+              },
+              "description": {
+                "en": "Click the button to open Prizrak-Box and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Prizrak-Box, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "prizrak-box://install-config?url={{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Prizrak-Box",
+                    "ru": "Добавить в Prizrak-Box"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Prizrak-Box, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Prizrak-Box, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        }
+      ]
+    },
+    "androidTV": {
+      "displayName": {
+        "en": "Android TV",
+        "ru": "Android TV"
+      },
+      "svgIconKey": "desktop",
+      "apps": [
+        {
+          "name": "Happ",
+          "featured": true,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Happ",
+                "ru": "Установите Happ"
+              },
+              "description": {
+                "en": "Install Happ on your TV. You can use your phone to open the download page and find the app in your TV’s store.",
+                "ru": "Установите Happ на телевизор. Страницу загрузки можно открыть на телефоне, а приложение найти в магазине телевизора."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://play.google.com/store/apps/details?id=com.happproxy",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Happ",
+                    "ru": "Скачать Happ"
+                  },
+                  "svgIconKey": "device"
+                },
+                {
+                  "link": "https://github.com/Happ-proxy/happ-android/releases/latest/download/Happ.apk",
+                  "type": "external",
+                  "text": {
+                    "en": "Download APK",
+                    "ru": "Скачать APK"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Happ",
+                "ru": "Добавьте в Happ"
+              },
+              "description": {
+                "en": "Click the button to open Happ and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Happ, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "happ://add/{{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Happ",
+                    "ru": "Добавить в Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Happ, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Happ, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        }
+      ]
+    },
+    "appleTV": {
+      "displayName": {
+        "en": "Apple TV",
+        "ru": "Apple TV"
+      },
+      "svgIconKey": "desktop",
+      "apps": [
+        {
+          "name": "Happ",
+          "featured": true,
+          "svgIconKey": "device",
+          "blocks": [
+            {
+              "title": {
+                "en": "Install Happ",
+                "ru": "Установите Happ"
+              },
+              "description": {
+                "en": "Install Happ on your TV. You can use your phone to open the download page and find the app in your TV’s store.",
+                "ru": "Установите Happ на телевизор. Страницу загрузки можно открыть на телефоне, а приложение найти в магазине телевизора."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "https://apps.apple.com/us/app/happ-proxy-utility-for-tv/id6748297274",
+                  "type": "external",
+                  "text": {
+                    "en": "Download Happ",
+                    "ru": "Скачать Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Add to Happ",
+                "ru": "Добавьте в Happ"
+              },
+              "description": {
+                "en": "Click the button to open Happ and confirm the subscription import. If the app does not open, copy the subscription link and add it inside the app.",
+                "ru": "Нажмите кнопку, чтобы открыть Happ, и подтвердите добавление подписки. Если приложение не открылось, скопируйте ссылку и добавьте её в самом приложении."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": [
+                {
+                  "link": "happ://add/{{SUBSCRIPTION_LINK}}",
+                  "type": "subscriptionLink",
+                  "text": {
+                    "en": "Add to Happ",
+                    "ru": "Добавить в Happ"
+                  },
+                  "svgIconKey": "device"
+                }
+              ]
+            },
+            {
+              "title": {
+                "en": "Enable VPN",
+                "ru": "Включите VPN"
+              },
+              "description": {
+                "en": "Open Happ, select the imported subscription and an available server, then turn on the connection. Accept the system VPN permission if prompted. If you are setting up a TV, complete these steps on the TV.",
+                "ru": "Откройте Happ, выберите добавленную подписку и доступный сервер, затем включите подключение. Подтвердите системный запрос на VPN, если он появится. Если настраиваете телевизор, выполните эти действия на телевизоре."
+              },
+              "svgIconKey": "device",
+              "svgIconColor": "green",
+              "buttons": []
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
