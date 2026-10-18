@@ -149,7 +149,7 @@ export function TrafficSummaryWidget({ variant }: { variant: 'collapsed' | 'expa
                             style={
                                 {
                                     width: `${traffic.progress}%`,
-                                    '--usage-color': `var(--mantine-color-${traffic.color}-5)`
+                                    '--usage-color': `var(--mantine-color-${traffic.color}-${traffic.color === 'yellow' ? 3 : 5})`
                                 } as CSSProperties
                             }
                         />
@@ -168,7 +168,7 @@ export function TrafficSummaryWidget({ variant }: { variant: 'collapsed' | 'expa
             </div>
             {variant === 'collapsed' && (
                 <>
-                    <Collapse expanded={expanded}>
+                    <Collapse expanded={expanded} keepMounted>
                         <div
                             className={classes.details}
                             id={detailsId}

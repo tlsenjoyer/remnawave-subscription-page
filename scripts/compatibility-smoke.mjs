@@ -21,6 +21,7 @@ const subscription = makeSubscription()
 const forwarded = []
 const payload = Buffer.from('dmxlc3M6Ly91bmNoYW5nZWQtc3Vic2NyaXB0aW9uCg==')
 const pathOf = value => '/' + value.replace(/^\//, '')
+const subscriptionPaths = new Set(['/api/sub/demo', `/api/sub/demo/${REQUEST_TEMPLATE_TYPE_VALUES[0]}`])
 const requests = new Map([
     [pathOf(GetMetadataCommand.url), { response: { version: '3.1.1', build: { time: '', number: '' }, git: { backend: { commitSha: '', branch: '', commitUrl: '' }, frontend: { commitSha: '', commitUrl: '' } } } }],
     [pathOf(GetSubpageConfigsCommand.url), { response: { total: 1, configs: [configEntry] } }],
@@ -35,7 +36,7 @@ const panel = createServer(async (req, res) => {
     const parts = []
     for await (const part of req) parts.push(part)
     forwarded.push({ path: req.url, headers: req.headers, body: Buffer.concat(parts).toString() })
-    if (req.url.startsWith('/api/sub/demo')) {
+    if (subscriptionPaths.has(req.url)) {
         res.writeHead(200, { 'content-type': 'text/plain', 'subscription-userinfo': 'upload=0; download=100; total=1000; expire=2000000000', 'profile-update-interval': '12' })
         res.end(payload)
     } else if (requests.has(req.url)) {
@@ -97,7 +98,7 @@ try {
         assert.equal(response.headers.get('profile-update-interval'), '12')
         assert.equal(response.headers.get('subscription-userinfo'), 'upload=0; download=100; total=1000; expire=2000000000')
     }
-    const subRequests = forwarded.filter(request => request.path.startsWith('/api/sub/demo'))
+    const subRequests = forwarded.filter(request => subscriptionPaths.has(request.path))
     assert.equal(subRequests.length, 2)
     for (const request of subRequests) {
         assert.equal(request.headers.authorization, undefined)

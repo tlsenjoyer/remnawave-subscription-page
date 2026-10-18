@@ -32,6 +32,7 @@ export function App() {
             <MantineProvider
                 cssVariablesResolver={v8CssVariablesResolver}
                 defaultColorScheme="dark"
+                forceColorScheme="dark"
                 theme={theme}
             >
                 <ModalsProvider>
