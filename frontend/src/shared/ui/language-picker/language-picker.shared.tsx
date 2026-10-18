@@ -52,6 +52,7 @@ export function LanguagePicker(props: IProps) {
         <Menu position="bottom" width={150} withArrow={false} withinPortal>
             <Menu.Target>
                 <ActionIcon
+                    aria-label="Change language"
                     color="gray"
                     radius="md"
                     size="xl"

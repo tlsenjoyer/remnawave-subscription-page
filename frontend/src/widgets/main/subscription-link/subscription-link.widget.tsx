@@ -1,3 +1,7 @@
+import { ActionIcon, Button, Group, Image, Stack, Text } from '@mantine/core'
+import { useClipboard } from '@mantine/hooks'
+import { modals } from '@mantine/modals'
+import { notifications } from '@mantine/notifications'
 import {
     IconBrandDiscord,
     IconBrandTelegram,
@@ -6,16 +10,13 @@ import {
     IconLink,
     IconMessageChatbot
 } from '@tabler/icons-react'
-import { ActionIcon, Button, Group, Image, Stack, Text } from '@mantine/core'
-import { notifications } from '@mantine/notifications'
-import { useClipboard } from '@mantine/hooks'
-import { modals } from '@mantine/modals'
 import { renderSVG } from 'uqr'
 
-import { constructSubscriptionUrl } from '@shared/utils/construct-subscription-url'
-import { useSubscription } from '@entities/subscription-info-store'
-import { vibrate } from '@shared/utils/vibrate'
 import { useTranslation } from '@shared/hooks'
+import { constructSubscriptionUrl } from '@shared/utils/construct-subscription-url'
+import { vibrate } from '@shared/utils/vibrate'
+
+import { useSubscription } from '@entities/subscription-info-store'
 
 import classes from './subscription-link.module.css'
 
@@ -38,7 +39,7 @@ export const SubscriptionLinkWidget = ({ supportUrl, hideGetLink }: IProps) => {
         notifications.show({
             title: t(baseTranslations.linkCopied),
             message: t(baseTranslations.linkCopiedToClipboard),
-            color: 'cyan'
+            color: 'green'
         })
         clipboard.copy(subscriptionUrl)
     }
@@ -56,10 +57,11 @@ export const SubscriptionLinkWidget = ({ supportUrl, hideGetLink }: IProps) => {
 
         const { icon: Icon, color } = matchedPlatform
             ? matchedPlatform[1]
-            : { icon: IconMessageChatbot, color: 'cyan' }
+            : { icon: IconMessageChatbot, color: 'green' }
 
         return (
             <ActionIcon
+                aria-label="Support"
                 c={color}
                 component="a"
                 href={supportUrl}
@@ -82,8 +84,8 @@ export const SubscriptionLinkWidget = ({ supportUrl, hideGetLink }: IProps) => {
         vibrate('tap')
 
         const subscriptionQrCode = renderSVG(subscriptionUrl, {
-            whiteColor: '#161B22',
-            blackColor: '#22d3ee'
+            whiteColor: '#09190f',
+            blackColor: '#86e9ad'
         })
 
         modals.open({
@@ -97,6 +99,7 @@ export const SubscriptionLinkWidget = ({ supportUrl, hideGetLink }: IProps) => {
             children: (
                 <Stack align="center">
                     <Image
+                        alt={t(baseTranslations.scanQrCode)}
                         src={`data:image/svg+xml;utf8,${encodeURIComponent(subscriptionQrCode)}`}
                         style={{ borderRadius: 'var(--mantine-radius-md)' }}
                     />
@@ -125,6 +128,7 @@ export const SubscriptionLinkWidget = ({ supportUrl, hideGetLink }: IProps) => {
         <Group gap="xs" ml="auto" wrap="nowrap">
             {!hideGetLink && (
                 <ActionIcon
+                    aria-label={t(baseTranslations.getLink)}
                     className={classes.actionIcon}
                     onClick={handleGetLink}
                     radius="md"

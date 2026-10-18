@@ -1,6 +1,6 @@
 services:
   remnawave-subscription-page:
-    image: remnawave/subscription-page:latest
+    image: ghcr.io/tlsenjoyer/remnawave-subscription-page:v1.0.0
     container_name: remnawave-subscription-page
     hostname: remnawave-subscription-page
     restart: always

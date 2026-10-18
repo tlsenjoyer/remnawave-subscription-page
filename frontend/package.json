@@ -24,7 +24,9 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt --write",
-    "format:check": "oxfmt --check"
+    "format:check": "oxfmt --check",
+    "test": "node --test tests/traffic.test.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@gfazioli/mantine-spinner": "4.1.8",
@@ -59,6 +61,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@types/byte-size": "^8.1.2",
     "@types/bytes": "^3.1.5",
     "@types/color-hash": "^2.0.0",

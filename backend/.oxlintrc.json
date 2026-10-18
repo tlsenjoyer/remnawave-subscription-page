@@ -1,10 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "jsPlugins": ["eslint-plugin-perfectionist"],
   "plugins": ["typescript", "eslint", "import", "unicorn", "oxc", "node", "promise"],
   "env": { "node": true },
   "categories": { "correctness": "error" },
-  "ignorePatterns": ["node_modules", "**/*.js", "**/*.d.ts"],
+  "ignorePatterns": ["node_modules", "**/*.js", "**/*.d.ts", "libs/contracts/index.ts"],
   "rules": {
     "no-console": "warn"
   }

@@ -6,7 +6,7 @@ export const theme = createTheme({
     components,
     cursorType: 'pointer',
     fontFamily:
-        'Montserrat, Vazirmatn, Apple Color Emoji, Noto Sans SC, Twemoji Country Flags, sans-serif',
+        'Inter, system-ui, Vazirmatn, Apple Color Emoji, Noto Sans SC, Twemoji Country Flags, sans-serif',
     fontFamilyMonospace: 'Fira Mono, monospace',
     breakpoints: {
         xs: '25em',
@@ -20,21 +20,21 @@ export const theme = createTheme({
     },
     scale: 1,
     fontSmoothing: true,
-    focusRing: 'never',
-    white: '#ffffff',
+    focusRing: 'auto',
+    white: '#e8f5eb',
     black: '#24292f',
     colors: {
         dark: [
-            '#c9d1d9',
-            '#b1bac4',
-            '#8b949e',
-            '#6e7681',
-            '#484f58',
-            '#30363d',
-            '#21262d',
-            '#161b22',
-            '#0d1117',
-            '#010409'
+            '#e8f5eb',
+            '#c6ddce',
+            '#9cbaaa',
+            '#769882',
+            '#365c43',
+            '#244b34',
+            '#193c28',
+            '#112b1c',
+            '#0c2115',
+            '#07170d'
         ],
 
         blue: [
@@ -50,16 +50,16 @@ export const theme = createTheme({
             '#002155'
         ],
         green: [
-            '#dafbe1',
-            '#aceebb',
-            '#6fdd8b',
-            '#4ac26b',
-            '#2da44e',
-            '#1a7f37',
-            '#116329',
-            '#044f1e',
-            '#003d16',
-            '#002d11'
+            '#e2f9ea',
+            '#b9efcc',
+            '#91e7b0',
+            '#65db90',
+            '#3ccf74',
+            '#22bd60',
+            '#189a4c',
+            '#14783e',
+            '#105f33',
+            '#0b4825'
         ],
         yellow: [
             '#fff8c5',
@@ -86,12 +86,12 @@ export const theme = createTheme({
             '#471700'
         ]
     },
-    primaryShade: 8,
-    primaryColor: 'cyan',
+    primaryShade: 5,
+    primaryColor: 'green',
     autoContrast: true,
     luminanceThreshold: 0.3,
     headings: {
-        fontFamily: 'Unbounded, Vazirmatn, Apple Color Emoji, Noto Sans SC, sans-serif',
+        fontFamily: 'Inter, system-ui, Vazirmatn, Apple Color Emoji, Noto Sans SC, sans-serif',
         fontWeight: '600'
     },
     defaultRadius: 'md'
