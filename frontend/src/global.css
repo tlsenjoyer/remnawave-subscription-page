@@ -1,78 +1,149 @@
 :root {
-  --surface: rgba(15, 38, 25, 0.9);
-  --surface-raised: #153522;
-  --border: rgba(95, 189, 125, 0.19);
-  --text-primary: #e8f5eb;
-  --text-secondary: #9cbaaa;
-  --text-accent: #86e9ad;
+  --card: 0 0% 100%;
+  --ring: 150 100% 25%;
+  --input: 200 10% 88%;
+  --muted: 200 10% 94%;
+  --accent: 200 10% 92%;
+  --border: 200 10% 88%;
+  --chart1: 150 100% 25%;
+  --chart2: 200 10% 40%;
+  --chart3: 45 100% 45%;
+  --chart4: 0 80% 50%;
+  --chart5: 200 10% 70%;
+  --radius: 0.5rem;
+  --popover: 0 0% 98%;
+  --primary: 150 100% 25%;
+  --secondary: 200 10% 92%;
+  --background: 0 0% 98%;
+  --foreground: 200 10% 15%;
+  --destructive: 0 80% 50%;
+  --sidebar-ring: 150 100% 25%;
+  --sidebar-accent: 200 10% 90%;
+  --sidebar-border: 200 10% 88%;
+  --card-foreground: 200 10% 15%;
+  --sidebar-primary: 150 100% 25%;
+  --muted-foreground: 200 10% 45%;
+  --accent-foreground: 200 10% 15%;
+  --popover-foreground: 200 10% 15%;
+  --primary-foreground: 0 0% 100%;
+  --sidebar-background: 200 10% 96%;
+  --sidebar-foreground: 200 10% 15%;
+  --secondary-foreground: 200 10% 15%;
+  --destructive-foreground: 0 0% 100%;
+  --sidebar-accent-foreground: 200 10% 15%;
+  --sidebar-primary-foreground: 0 0% 100%;
 }
-html,
-body {
-  min-height: 100%;
-  background-color: #09190f;
-  background-image:
-    linear-gradient(to right, rgba(100, 190, 124, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(100, 190, 124, 0.045) 1px, transparent 1px);
-  background-size: 80px 80px;
-  background-attachment: fixed;
-  color: var(--text-primary);
+
+:root[data-mantine-color-scheme='dark'] {
+  --card: 200 10% 14%;
+  --ring: 150 100% 30%;
+  --input: 200 10% 25%;
+  --muted: 200 10% 16%;
+  --accent: 200 10% 20%;
+  --border: 200 10% 25%;
+  --chart1: 150 100% 30%;
+  --chart2: 200 10% 60%;
+  --chart4: 0 80% 55%;
+  --chart5: 200 10% 30%;
+  --popover: 200 10% 10%;
+  --primary: 150 100% 30%;
+  --secondary: 200 10% 20%;
+  --background: 200 10% 10%;
+  --foreground: 0 0% 95%;
+  --destructive: 0 80% 55%;
+  --sidebar-ring: 150 100% 30%;
+  --sidebar-accent: 200 10% 20%;
+  --sidebar-border: 200 10% 25%;
+  --card-foreground: 0 0% 95%;
+  --sidebar-primary: 150 100% 30%;
+  --muted-foreground: 200 10% 65%;
+  --accent-foreground: 0 0% 95%;
+  --popover-foreground: 0 0% 95%;
+  --sidebar-background: 200 15% 8%;
+  --sidebar-foreground: 0 0% 95%;
+  --secondary-foreground: 0 0% 95%;
+  --destructive-foreground: 0 0% 95%;
+  --sidebar-accent-foreground: 0 0% 95%;
 }
-#root {
-  min-height: 100dvh;
+
+/* Keep house components and custom surfaces on the same semantic palette. */
+:root:root[data-mantine-color-scheme] {
+  --surface: hsl(var(--card));
+  --surface-raised: hsl(var(--muted));
+  --text-primary: hsl(var(--foreground));
+  --text-secondary: hsl(var(--muted-foreground));
+  --text-accent: hsl(var(--primary));
+  --mantine-color-body: hsl(var(--background));
+  --mantine-color-text: hsl(var(--foreground));
+  --mantine-color-dimmed: hsl(var(--muted-foreground));
+  --mantine-color-default: hsl(var(--card));
+  --mantine-color-default-hover: hsl(var(--muted));
+  --mantine-color-default-color: hsl(var(--foreground));
+  --mantine-color-default-border: hsl(var(--border));
+  --mantine-primary-color-filled: hsl(var(--primary));
+  --mantine-primary-color-filled-hover: color-mix(in srgb, hsl(var(--primary)), black 12%);
+  --mantine-primary-color-light: hsl(var(--primary) / 0.08);
+  --mantine-primary-color-light-hover: hsl(var(--primary) / 0.13);
+  --mantine-primary-color-light-color: var(--text-accent);
+  --mantine-color-green-light-color: var(--text-accent);
+  --mantine-color-green-outline: var(--text-accent);
 }
+
+/* Preserve readable small green labels and white button text in the dark palette. */
+:root:root[data-mantine-color-scheme='dark'] {
+  --text-accent: color-mix(in srgb, hsl(var(--primary)), white 24%);
+  --mantine-primary-color-filled: color-mix(in srgb, hsl(var(--primary)), black 20%);
+  --mantine-primary-color-filled-hover: color-mix(in srgb, hsl(var(--primary)), black 30%);
+  --mantine-color-green-filled: var(--mantine-primary-color-filled);
+  --mantine-color-green-filled-hover: var(--mantine-primary-color-filled-hover);
+}
+
+html, body { min-height: 100%; }
+body { background: hsl(var(--background)); color: var(--text-primary); }
+#root { min-height: 100dvh; }
+
 .animated-background {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(
-    ellipse 80% 50% at 50% 0%,
-    rgba(26, 104, 53, 0.12),
-    transparent 75%
-  );
+  color: hsl(var(--primary));
+  opacity: 0.13;
+  mask-image: linear-gradient(to bottom, #000, #0009 65%, transparent);
 }
-.header-wrapper {
-  position: relative;
-  z-index: 2;
-  background: rgba(9, 25, 15, 0.65);
-  border-bottom: 1px solid var(--border);
-}
-.logo-text-highlight {
-  color: var(--text-accent);
-}
-.logo-text-normal {
-  color: var(--text-primary);
-}
+
 :where(button, a, input, select, [tabindex]):focus-visible {
-  outline: 2px solid #86e9ad;
-  outline-offset: 4px;
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
 }
-.mantine-Modal-content,
-.mantine-Modal-header,
-.mantine-Popover-dropdown,
-.mantine-Menu-dropdown,
-.mantine-Notification-root,
-.mantine-Drawer-content,
-.mantine-Drawer-header {
-  background: #112b1c;
-  border-color: var(--border);
+
+.mantine-Modal-content, .mantine-Modal-header,
+.mantine-Notification-root, .mantine-Drawer-content, .mantine-Drawer-header {
+  background: var(--surface);
+  color: var(--text-primary);
+  border-color: hsl(var(--border));
 }
-.mantine-NativeSelect-input,
-.mantine-Select-input {
-  background-color: #153522;
-  border-color: var(--border);
+.mantine-Popover-dropdown, .mantine-Menu-dropdown {
+  background: hsl(var(--popover));
+  color: var(--text-primary);
+  border-color: hsl(var(--border));
+}
+.mantine-NativeSelect-input, .mantine-Select-input {
+  background: var(--surface);
+  border-color: hsl(var(--input));
   color: var(--text-primary);
 }
-.mantine-Button-root,
-.mantine-ActionIcon-root {
-  transition:
-    background 150ms ease,
-    border-color 150ms ease;
+.mantine-Button-root, .mantine-ActionIcon-root {
+  font-weight: 500;
+  border-radius: 6px;
+  transition: background-color 150ms ease, border-color 150ms ease;
 }
+.mantine-Badge-root { font-weight: 500; letter-spacing: 0; text-transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

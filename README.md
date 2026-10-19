@@ -1,13 +1,13 @@
 # Товарищ VPN subscription page
 
-A compact green subscription dashboard and guided connection flow for Remnawave. Fork release **v2.0.0**; the embedded upstream compatibility version remains **8.0.0**. Existing subscription routes, payloads, panel configuration schema, forwarding, and configuration-session behavior are retained. A separate read-only device API is added.
+A compact green subscription dashboard and guided connection flow for Remnawave. Fork release **v2.1.0**; the embedded upstream compatibility version remains **8.0.0**. Existing subscription routes, payloads, panel configuration schema, forwarding, and configuration-session behavior are retained. A separate read-only device API is added.
 
 ## Deployment
 
 Public AMD64 and ARM64 image:
 
 ```text
-ghcr.io/tlsenjoyer/remnawave-subscription-page:v2.0.0
+ghcr.io/tlsenjoyer/remnawave-subscription-page:v2.1.0
 ```
 
 1. Copy `.env.sample` to `.env`. Set `REMNAWAVE_PANEL_URL`, `REMNAWAVE_API_TOKEN`, and `SUPPORT_EMAIL=support@tovarish.net`.
@@ -27,7 +27,7 @@ The panel configuration is loaded **at startup**. Restart the subscription conta
 
 Branding title/logo, Telegram support URL, platform/client entries, translations, SVGs and instructions remain editable in the panel. Set the title to **Товарищ VPN**, logo to `https://s.812004.xyz/static/shield-icon.svg`, and support URL to `https://t.me/tovarishvpnbot`. Email is deployment configuration because the panel schema has no email field. It is public contact information, never a secret.
 
-The new frontend uses one presentation: traffic, connection, devices, support. Legacy `cards`, `expanded`, and `collapsed` subscription values all render the compact expandable traffic card; `hidden` still hides it. Installation-guide presentation selectors remain accepted but no longer select a visual layout. `showConnectionKeys` still controls raw keys, now inside the wizard. `hideGetLinkButton` no longer has a standalone header button to control; the subscription copy and QR fallback remain part of setup.
+The new frontend uses one presentation: traffic, connection, devices, support. Legacy `cards`, `expanded`, and `collapsed` subscription values all render the compact traffic card; `hidden` still hides it. Installation-guide presentation selectors remain accepted but no longer select a visual layout. `showConnectionKeys` and `hideGetLinkButton` remain accepted for configuration compatibility. The guided interface omits raw connection keys; subscription copy and QR controls appear below the traffic reset caption on the main page.
 
 For each platform, the first app marked `featured` is recommended and selected; if none is featured, the first app is selected. Each app uses ordered instruction blocks:
 
@@ -62,9 +62,9 @@ Downloads for desktop clients open official release/package selection pages, avo
 
 ## Traffic and connection behavior
 
-Bandwidth translations are **LTE трафик** / **LTE traffic**. Raw-byte math, localized quota amounts, the green/amber/red thresholds at 80% and 100%, unlimited usage, actual overage amounts, reset schedules, exact-byte tooltip and explicit subscription states are preserved. Expansion shows status and expiry, including indefinite expiry. Username data remains internal for existing link templates.
+Bandwidth translations are **LTE трафик** / **LTE traffic**. Raw-byte math, localized quota amounts, the green/amber/red thresholds at 80% and 100%, unlimited usage, actual overage amounts, reset schedules, exact-byte tooltip and explicit subscription states are preserved. The plan header shows status once and a muted expiry caption, including indefinite expiry. Username data remains internal for existing link templates.
 
-The fullscreen wizard offers installation, import/enablement, and completion. Back preserves selection. Reopening starts at installation while remembering the selected app/platform for this page session. Inactive users may set up an app with a clear warning. Copy, QR, and advanced raw keys live in the wizard. There is no IP test, automatic connection verdict, payment, renewal, or device-deletion feature.
+The fullscreen wizard offers installation, import/enablement, and completion. Back preserves selection. Reopening starts at installation while remembering the selected app/platform for this page session. Inactive users may set up an app with a clear warning. Subscription copy and a QR popup live on the main page. All three wizard steps share a 760px panel, heading alignment, navigation footer, and quiet support link. The app menu overlays the content without shifting it. The import step keeps the app import action primary; the final step names the chosen app without claiming to verify connectivity. The support footer stays at the bottom of short steps and follows longer content without covering controls. Panel-authored instructions, button labels, and button icons are preserved. Edit each download button’s localized text in the panel to set its label. Inner step content uses a short fade and slight movement, disabled for reduced motion. The traffic card ends after its full-width QR control, with no details accordion or reserved space. There is no IP test, automatic connection verdict, payment, renewal, or device-deletion feature.
 
 ## Read-only device API
 
@@ -101,6 +101,7 @@ npm run test:e2e
 npm run start:build
 ```
 
+For live local development, fill in the root `.env` with your panel URL and API token, install dependencies in both applications, then run `npm run start:live` from `frontend`. This builds and starts the backend on port 3010 and Vite on `127.0.0.1:3334`. Open the real subscription path on that local origin (including `CUSTOM_SUB_PREFIX`, if configured). Subscription hydration, configuration and device requests use the backend; credentials stay server-side. Frontend edits update through Vite. Restart after panel configuration or backend changes. Set `LOCAL_BACKEND_PORT` if port 3010 is occupied.
 Preview synthetic data with `node tests/dev-server.mjs` from `frontend`, then open `http://127.0.0.1:3334/demo`. No panel credentials or real user data are required. The fixture server is excluded from production.
 
 ```sh
@@ -124,7 +125,7 @@ The production mock-panel smoke verifies unchanged hydration/config responses, s
 
 ## Release and rollback
 
-PRs and main run validation. Stable `vX.Y.Z` tags publish AMD64/ARM64 manifests to GHCR using `GITHUB_TOKEN`; the tag must match `RELEASE_VERSION`. v2.0.0 and `latest` use the same release image. The upstream embedded compatibility version remains independent. Verify the public manifest and an anonymous pull after publication.
+PRs and main run validation. Stable `vX.Y.Z` tags publish AMD64/ARM64 manifests to GHCR using `GITHUB_TOKEN`; the tag must match `RELEASE_VERSION`. v2.1.0 and `latest` use the same release image. The upstream embedded compatibility version remains independent. Verify the public manifest and an anonymous pull after publication.
 
 Keep the v1.0.0 image and your old panel configuration for rollback. Restore both, then recreate/restart the container. No database migration is introduced. Health and startup logs confirm readiness; device failures remain visible in the modal with retry and support.
 

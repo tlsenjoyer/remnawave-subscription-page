@@ -1,5 +1,3 @@
 import { TrafficSummaryWidget } from './traffic-summary.widget'
 
-export const SubscriptionInfoExpandedWidget = (_: { isMobile: boolean }) => (
-    <TrafficSummaryWidget variant="expanded" />
-)
+export const SubscriptionInfoExpandedWidget = (_: { isMobile: boolean }) => <TrafficSummaryWidget />

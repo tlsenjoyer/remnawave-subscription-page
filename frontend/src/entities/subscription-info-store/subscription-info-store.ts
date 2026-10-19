@@ -1,4 +1,3 @@
-import { GetSubscriptionInfoByShortUuidCommand } from '@remnawave/backend-contract'
 import { create } from 'zustand'
 
 import { IActions, IState } from './interfaces'
@@ -30,7 +29,7 @@ export const useSubscriptionInfoStoreActions = () =>
 
 export const useSubscriptionInfoStoreInfo = () => useSubscriptionInfoStore((state) => state)
 
-export const useSubscription = (): GetSubscriptionInfoByShortUuidCommand.Response['response'] => {
+export const useSubscription = (): NonNullable<IState['subscription']> => {
     const subscription = useSubscriptionInfoStore((state) => state.subscription)
     if (!subscription) {
         throw new Error(

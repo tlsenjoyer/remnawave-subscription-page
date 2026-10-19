@@ -21,20 +21,20 @@ export const theme = createTheme({
     scale: 1,
     fontSmoothing: true,
     focusRing: 'auto',
-    white: '#e8f5eb',
-    black: '#24292f',
+    white: '#ffffff',
+    black: '#22272a',
     colors: {
         dark: [
-            '#e8f5eb',
-            '#c6ddce',
-            '#9cbaaa',
-            '#769882',
-            '#365c43',
-            '#244b34',
-            '#193c28',
-            '#112b1c',
-            '#0c2115',
-            '#07170d'
+            '#f2f2f2',
+            '#c7cdd1',
+            '#9da9af',
+            '#67767e',
+            '#394147',
+            '#2e3538',
+            '#252b2d',
+            '#202528',
+            '#171b1c',
+            '#11171a'
         ],
 
         blue: [
@@ -50,16 +50,16 @@ export const theme = createTheme({
             '#002155'
         ],
         green: [
-            '#e2f9ea',
-            '#b9efcc',
-            '#91e7b0',
-            '#65db90',
-            '#3ccf74',
-            '#22bd60',
-            '#189a4c',
-            '#14783e',
-            '#105f33',
-            '#0b4825'
+            '#edf8f2',
+            '#d1ecde',
+            '#a2d9bd',
+            '#6fc49a',
+            '#38ad73',
+            '#00994d',
+            '#008040',
+            '#006b36',
+            '#00542a',
+            '#003d1f'
         ],
         yellow: [
             '#fff8c5',
@@ -86,13 +86,14 @@ export const theme = createTheme({
             '#471700'
         ]
     },
-    primaryShade: 5,
+    primaryShade: { light: 6, dark: 5 },
     primaryColor: 'green',
-    autoContrast: true,
+    autoContrast: false,
     luminanceThreshold: 0.3,
     headings: {
         fontFamily: 'Inter, system-ui, Vazirmatn, Apple Color Emoji, Noto Sans SC, sans-serif',
         fontWeight: '600'
     },
+    radius: { xs: '4px', sm: '6px', md: '8px', lg: '8px', xl: '12px' },
     defaultRadius: 'md'
 })

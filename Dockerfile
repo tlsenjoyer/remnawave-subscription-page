@@ -17,10 +17,10 @@ RUN NODE_ENV=production npm run build && npm run trace
 
 FROM node:24-bookworm-slim
 WORKDIR /opt/app
-ARG RELEASE_VERSION=2.0.0
+ARG RELEASE_VERSION=2.1.0
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="Товарищ VPN Subscription Page" \
-      org.opencontainers.image.description="Dark green subscription frontend with upstream Remnawave API compatibility" \
+      org.opencontainers.image.description="Theme-aware subscription frontend with upstream Remnawave API compatibility" \
       org.opencontainers.image.url="https://github.com/tlsenjoyer/remnawave-subscription-page" \
       org.opencontainers.image.source="https://github.com/tlsenjoyer/remnawave-subscription-page" \
       org.opencontainers.image.version="${RELEASE_VERSION}" \

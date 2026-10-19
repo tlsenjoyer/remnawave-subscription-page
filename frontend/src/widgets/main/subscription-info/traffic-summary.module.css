@@ -1,47 +1,32 @@
 .card {
   overflow: visible;
-}
-.triggerArea {
-  position: relative;
-}
-.summaryToggle {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 20px;
-  z-index: 1;
-}
-.summaryToggle:hover {
-  background: rgba(65, 202, 124, 0.035);
-}
-.amount {
-  position: relative;
-  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 .card[data-status="EXPIRED"],
 .card[data-status="DISABLED"] {
   border-color: rgba(250, 113, 113, 0.5);
-  background: linear-gradient(120deg, rgba(96, 35, 31, 0.2), var(--surface));
+  background: var(--surface);
 }
 .card[data-status="LIMITED"] {
   border-color: rgba(245, 183, 66, 0.5);
-  background: linear-gradient(120deg, rgba(98, 71, 20, 0.2), var(--surface));
+  background: var(--surface);
 }
 .summary {
-  padding: clamp(18px, 3vw, 28px);
+  padding: 28px 24px;
 }
 .heading {
   color: var(--text-primary);
   font-size: 18px;
-  font-weight: 650;
+  font-weight: 500;
 }
 .usageRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 22px 0 10px;
+  margin: 28px 0 12px;
   flex-wrap: wrap;
 }
 .amount {
@@ -53,10 +38,10 @@
   padding: 4px 0;
 }
 .track {
-  height: 8px;
-  border-radius: 8px;
+  height: 6px;
+  border-radius: 3px;
   overflow: hidden;
-  background: rgba(186, 225, 196, 0.12);
+  background: hsl(var(--secondary));
 }
 .fill {
   height: 100%;
@@ -64,69 +49,28 @@
   background: var(--usage-color);
   transition: width 200ms ease;
 }
-.toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  color: var(--text-secondary);
-  border-top: 1px solid var(--border);
-  padding: 14px clamp(18px, 3vw, 28px);
-  font-size: 12px;
-}
-.toggle:hover {
-  background: rgba(65, 202, 124, 0.06);
-  color: var(--text-primary);
-}
-.chevron {
-  transition: transform 150ms ease;
-}
-.details {
-  padding: 0 clamp(18px, 3vw, 28px) 22px;
-}
-.detailGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.detail {
-  background: rgba(105, 193, 134, 0.05);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  min-width: 0;
-}
-.detailValue {
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 600;
-  margin-top: 6px;
-  overflow-wrap: anywhere;
-}
-.cards {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-.cards > .detailGrid,
-.trafficCard {
-  grid-column: 1 / -1;
-}
 .popover {
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   max-width: min(360px, calc(100vw - 32px));
   overflow-wrap: anywhere;
 }
-@media (max-width: 360px) {
-  .detailGrid,
-  .cards {
-    grid-template-columns: 1fr;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
-  .fill,
-  .chevron {
-    transition: none;
-  }
+  .fill { transition: none; }
+}
+
+.linkControls { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 24px; }
+.linkRow { display: flex; align-items: stretch; gap: 8px; width: 100%; }
+.linkField { min-width: 0; flex: 1; }
+.linkInput { min-width: 0; width: 100%; height: 44px; border: 1px solid hsl(var(--border)); border-radius: 6px; background: hsl(var(--muted)); color: var(--text-secondary); padding: 0 12px; font: 12px var(--mantine-font-family-monospace); text-overflow: ellipsis; }
+.linkInput:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.linkControls :global(.mantine-Button-root) { flex-shrink: 0; height: auto; min-height: 44px; }
+.linkControls :global(.mantine-Button-label) { white-space: normal; text-align: start; }
+.qr { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 16px 0; text-align: center; }
+.qr img { padding: 8px; background: white; border-radius: 6px; max-width: 100%; }
+@media (max-width: 480px) { .linkRow :global(.mantine-Button-section) { display: none; } .summary { padding: 24px 20px; } }
+@media (min-width: 768px) {
+  .summary { padding-block: 32px; display: flex; flex-direction: column; flex: 1; }
+  .linkControls { margin-top: auto; padding-top: 24px; }
+  .linkControls > :global(.mantine-Button-root) { min-height: 48px; }
 }

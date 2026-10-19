@@ -62,8 +62,8 @@ export const RawKeysWidget = ({ isMobile }: IProps) => {
 
     const handleShowQr = (link: ParsedLink) => {
         const qrCode = renderSVG(link.fullLink, {
-            whiteColor: '#09190f',
-            blackColor: '#86e9ad'
+            whiteColor: '#ffffff',
+            blackColor: '#22272a'
         })
 
         modals.open({
@@ -93,7 +93,7 @@ export const RawKeysWidget = ({ isMobile }: IProps) => {
         <Card p={{ base: 'sm', xs: 'md', sm: 'lg', md: 'xl' }} radius="lg">
             <Stack gap="md">
                 <Group gap="sm" justify="space-between">
-                    <Title c="white" fw={600} order={4}>
+                    <Title fw={600} order={4}>
                         {t(baseTranslations.connectionKeysHeader)}
                     </Title>
                     {parsedLinks.length > 1 && (
@@ -117,12 +117,7 @@ export const RawKeysWidget = ({ isMobile }: IProps) => {
                                             }}
                                         />
                                         <Box className={classes.keyName}>
-                                            <Text
-                                                c="white"
-                                                fw={500}
-                                                size={isMobile ? 'xs' : 'sm'}
-                                                span
-                                            >
+                                            <Text fw={500} size={isMobile ? 'xs' : 'sm'} span>
                                                 {link.name}
                                             </Text>
                                         </Box>

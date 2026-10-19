@@ -3,16 +3,16 @@ import type {
     TSubscriptionPageButtonConfig,
     TSubscriptionPagePlatformKey
 } from '@remnawave/subscription-page-types'
+import type { ReactNode } from 'react'
 
 import {
-    Accordion,
     Alert,
     Badge,
     Button,
     Card,
     Group,
-    Image,
     Loader,
+    Menu,
     Modal,
     Stack,
     Text,
@@ -30,11 +30,10 @@ import {
     IconDevices,
     IconHelpCircle,
     IconMail,
-    IconShieldCheck,
     IconWifi
 } from '@tabler/icons-react'
 import { useRef, useState } from 'react'
-import { renderSVG } from 'uqr'
+import { FaAndroid, FaApple, FaLinux, FaWindows } from 'react-icons/fa6'
 
 import { useTranslation } from '@shared/hooks'
 import { getIconFromLibrary } from '@shared/utils/config-parser'
@@ -44,7 +43,6 @@ import { TemplateEngine } from '@shared/utils/template-engine'
 import { useAppConfig, useCurrentLang } from '@entities/app-config-store'
 import { useSubscription } from '@entities/subscription-info-store'
 
-import { RawKeysWidget } from '../raw-keys/raw-keys.widget'
 import { formatClientLink } from './client-link'
 import { getDashboardCopy } from './dashboard-copy'
 import classes from './dashboard.module.css'
@@ -58,6 +56,16 @@ const platformOrder: TSubscriptionPagePlatformKey[] = [
     'androidTV',
     'appleTV'
 ]
+const platformIcons = {
+    ios: FaApple,
+    android: FaAndroid,
+    windows: FaWindows,
+    macos: FaApple,
+    linux: FaLinux,
+    androidTV: FaAndroid,
+    appleTV: FaApple
+} satisfies Record<TSubscriptionPagePlatformKey, typeof FaApple>
+
 const recommendedIndex = (apps: TSubscriptionPageAppConfig[]) =>
     Math.max(
         0,
@@ -77,10 +85,10 @@ interface DeviceList {
 
 export function DashboardWidget({
     platform,
-    isMobile
+    children
 }: {
     platform?: TSubscriptionPagePlatformKey
-    isMobile: boolean
+    children?: ReactNode
 }) {
     const config = useAppConfig()
     const lang = useCurrentLang()
@@ -103,7 +111,6 @@ export function DashboardWidget({
     const [wizard, setWizard] = useState(false)
     const [step, setStep] = useState(0)
     const [alternatives, setAlternatives] = useState(false)
-    const [qr, setQr] = useState(false)
     const [support, setSupport] = useState(false)
     const [devicesOpen, setDevicesOpen] = useState(false)
     const [devices, setDevices] = useState<DeviceList | null>(null)
@@ -120,11 +127,10 @@ export function DashboardWidget({
         document.getElementById('sbpg')?.dataset.supportEmail || 'support@tovarish.net'
     const move = (next: number) => {
         setStep(next)
-        setQr(false)
         requestAnimationFrame(() => {
             const heading = stepHeading.current
             heading?.focus({ preventScroll: true })
-            // Keep the step indicator and Back control visible after a long instruction step.
+            // Return to the shared frame after a long instruction step.
             for (
                 let node = heading?.parentElement;
                 node && node !== document.body;
@@ -134,14 +140,6 @@ export function DashboardWidget({
             }
         })
     }
-    const copy = async () => {
-        try {
-            await navigator.clipboard.writeText(subscriptionUrl)
-            notifications.show({ message: c.copied, color: 'green' })
-        } catch {
-            notifications.show({ message: c.copyFailed, color: 'yellow' })
-        }
-    }
     const buttonLink = (button: TSubscriptionPageButtonConfig) =>
         button.type === 'external'
             ? button.link
@@ -149,22 +147,32 @@ export function DashboardWidget({
                   username: subscription.user.username,
                   subscriptionUrl
               })
+    const copyLink = async (link: string) => {
+        try {
+            await navigator.clipboard.writeText(link)
+            notifications.show({ message: c.copied })
+        } catch {
+            notifications.show({ message: c.copyFailed, color: 'yellow' })
+        }
+    }
     const buttons = (items: TSubscriptionPageButtonConfig[]) =>
         items.map((button, index) => {
             const link = buttonLink(button)
+            const svg = getIconFromLibrary(button.svgIconKey, config.svgLibrary)
+            const icon = svg ? (
+                <span
+                    className={classes.panelIcon}
+                    aria-hidden="true"
+                    dangerouslySetInnerHTML={{ __html: svg }}
+                />
+            ) : undefined
             if (button.type === 'copyButton')
                 return (
                     <Button
                         key={index}
+                        leftSection={icon}
                         variant="light"
-                        onClick={async () => {
-                            try {
-                                await navigator.clipboard.writeText(link)
-                                notifications.show({ message: c.copied })
-                            } catch {
-                                notifications.show({ message: c.copyFailed, color: 'yellow' })
-                            }
-                        }}
+                        onClick={() => void copyLink(link)}
                     >
                         {t(button.text)}
                     </Button>
@@ -172,6 +180,7 @@ export function DashboardWidget({
             return (
                 <Button
                     component="a"
+                    leftSection={icon}
                     href={link}
                     key={index}
                     target="_blank"
@@ -200,14 +209,6 @@ export function DashboardWidget({
         <Stack gap="sm">
             <Button
                 component="a"
-                href={`mailto:${supportEmail}`}
-                variant="light"
-                leftSection={<IconMail size={18} />}
-            >
-                {supportEmail}
-            </Button>
-            <Button
-                component="a"
                 href={config.brandingSettings.supportUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -215,24 +216,19 @@ export function DashboardWidget({
             >
                 {c.telegram}
             </Button>
+            <Button
+                component="a"
+                href={`mailto:${supportEmail}`}
+                variant="light"
+                leftSection={<IconMail size={18} />}
+            >
+                {supportEmail}
+            </Button>
         </Stack>
-    )
-    const supportSection = (
-        <section className={classes.supportInset}>
-            <Title order={3} size="lg">
-                {c.help}
-            </Title>
-            <Text c="dimmed" size="sm" mb="md">
-                {c.helpText}
-            </Text>
-            {contactButtons}
-        </section>
     )
     const loadDevices = async () => {
         const id = ++deviceRequest.current
         setLoading(true)
-        setDeviceError(null)
-        setDevices(null)
         try {
             const base = new URL(subscriptionUrl)
             base.pathname = base.pathname.replace(/\/[^/]+\/?$/, '/api/devices')
@@ -244,13 +240,20 @@ export function DashboardWidget({
             })
             if (id !== deviceRequest.current) return
             if (!response.ok) {
+                setDevices(null)
                 setDeviceError(response.status === 401 ? 'expired' : 'unavailable')
                 return
             }
             const data: DeviceList = await response.json()
-            if (id === deviceRequest.current) setDevices(data)
+            if (id === deviceRequest.current) {
+                setDevices(data)
+                setDeviceError(null)
+            }
         } catch {
-            if (id === deviceRequest.current) setDeviceError('unavailable')
+            if (id === deviceRequest.current) {
+                setDevices(null)
+                setDeviceError('unavailable')
+            }
         } finally {
             if (id === deviceRequest.current) setLoading(false)
         }
@@ -261,16 +264,12 @@ export function DashboardWidget({
         <>
             <Card className={classes.connection} p={0}>
                 <div className={classes.connectionTop}>
-                    <div className={classes.connectionIcon}>
-                        <IconWifi size={26} />
-                    </div>
-                    <div>
-                        <Text className={classes.eyebrow}>{config.brandingSettings.title}</Text>
-                        <Title order={2} className={classes.connectionTitle}>
-                            {c.intro}
-                        </Title>
-                    </div>
+                    <Text className={classes.eyebrow}>{c.step}</Text>
+                    <IconWifi size={21} aria-hidden="true" />
                 </div>
+                <Title order={2} className={classes.connectionTitle}>
+                    {c.intro}
+                </Title>
                 <Text c="dimmed" className={classes.subtitle}>
                     {c.subtitle}
                 </Text>
@@ -283,7 +282,6 @@ export function DashboardWidget({
                     rightSection={<IconArrowRight size={21} />}
                     onClick={() => {
                         setStep(0)
-                        setQr(false)
                         setAlternatives(false)
                         setWizard(true)
                     }}
@@ -291,6 +289,7 @@ export function DashboardWidget({
                     {c.connect}
                 </Button>
             </Card>
+            {children}
             <UnstyledButton
                 className={classes.deviceRow}
                 onClick={() => {
@@ -316,7 +315,7 @@ export function DashboardWidget({
                     </Title>
                     <Button
                         variant="subtle"
-                        px={0}
+                        px="sm"
                         onClick={() => setSupport(true)}
                         rightSection={<IconArrowRight size={16} />}
                     >
@@ -332,263 +331,209 @@ export function DashboardWidget({
                 opened={wizard}
                 onClose={() => setWizard(false)}
                 fullScreen
-                title={c.step}
-                closeButtonProps={{ 'aria-label': c.close }}
+                withCloseButton={false}
                 classNames={{
                     content: classes.wizard,
                     header: classes.wizardHeader,
                     body: classes.wizardBody
                 }}
             >
-                <div className={classes.wizardShell}>
-                    <div className={classes.wizardToolbar}>
-                        {step > 0 ? (
+                <div className={classes.wizardContent}>
+                    <div className={classes.wizardShell}>
+                        <Modal.Header>
+                            <Modal.Title>{c.step}</Modal.Title>
+                            <Modal.CloseButton aria-label={c.close} size={40} iconSize={20} />
+                        </Modal.Header>
+                        <ol className={classes.steps} aria-label={c.step}>
+                            {[c.install, c.import, c.complete].map((label, index) => (
+                                <li
+                                    key={label}
+                                    data-active={step >= index}
+                                    aria-current={step === index ? 'step' : undefined}
+                                >
+                                    <span>
+                                        {index < step ? <IconCheck size={14} /> : `0${index + 1}`}
+                                    </span>
+                                    {label}
+                                </li>
+                            ))}
+                        </ol>
+                        {subscription.user.userStatus !== 'ACTIVE' && (
+                            <Alert color="yellow" mb="lg">
+                                {c.warning}
+                            </Alert>
+                        )}
+                        <section className={classes.stepPanel}>
+                            <div key={step} className={classes.stepContent}>
+                                <div className={classes.stepHeading}>
+                                    {step === 2 && (
+                                        <span className={classes.successMark}>
+                                            <IconCheck size={22} stroke={1.8} aria-hidden="true" />
+                                        </span>
+                                    )}
+                                    <Title
+                                        ref={stepHeading}
+                                        tabIndex={-1}
+                                        order={2}
+                                        className={classes.stepTitle}
+                                    >
+                                        {step === 0
+                                            ? c.installTitle
+                                            : step === 1
+                                              ? c.add
+                                              : c.success}
+                                    </Title>
+                                </div>
+                                {step === 0 && (
+                                    <>
+                                        <Text size="sm" c="dimmed" mb="sm">
+                                            {c.platform}
+                                        </Text>
+                                        <div
+                                            className={classes.platforms}
+                                            role="group"
+                                            aria-label={c.platform}
+                                        >
+                                            {available.map((key) => (
+                                                <UnstyledButton
+                                                    aria-pressed={key === selectedPlatform}
+                                                    className={classes.platform}
+                                                    key={key}
+                                                    onClick={() => {
+                                                        setPlatform(key)
+                                                        setIndex(
+                                                            recommendedIndex(
+                                                                config.platforms[key]!.apps
+                                                            )
+                                                        )
+                                                        setAlternatives(false)
+                                                        move(0)
+                                                    }}
+                                                >
+                                                    <span aria-hidden="true">
+                                                        {(() => {
+                                                            const PlatformIcon = platformIcons[key]
+                                                            return <PlatformIcon size={20} />
+                                                        })()}
+                                                    </span>
+                                                    {t(config.platforms[key]!.displayName)}
+                                                </UnstyledButton>
+                                            ))}
+                                        </div>
+                                        {app ? (
+                                            <div className={classes.appSection}>
+                                                <div className={classes.selectedApp}>
+                                                    <Title order={3}>{app.name}</Title>
+                                                    {selectedIndex === recommendedIndex(apps) && (
+                                                        <Badge variant="light">
+                                                            {c.recommended}
+                                                        </Badge>
+                                                    )}
+                                                    {apps.length > 1 && (
+                                                        <Menu
+                                                            classNames={{
+                                                                item: classes.clientOption
+                                                            }}
+                                                            opened={alternatives}
+                                                            onChange={setAlternatives}
+                                                            position="bottom-end"
+                                                            transitionProps={{
+                                                                transition: 'pop',
+                                                                duration: 140
+                                                            }}
+                                                        >
+                                                            <Menu.Target>
+                                                                <Button
+                                                                    variant="default"
+                                                                    size="xs"
+                                                                    aria-label={c.choose}
+                                                                    rightSection={
+                                                                        <IconChevronDown
+                                                                            size={15}
+                                                                        />
+                                                                    }
+                                                                >
+                                                                    {c.change}
+                                                                </Button>
+                                                            </Menu.Target>
+                                                            <Menu.Dropdown aria-label={c.choose}>
+                                                                {apps.map((item, index) => (
+                                                                    <Menu.Item
+                                                                        key={item.name}
+                                                                        leftSection={
+                                                                            index ===
+                                                                            selectedIndex ? (
+                                                                                <IconCheck
+                                                                                    size={16}
+                                                                                />
+                                                                            ) : undefined
+                                                                        }
+                                                                        onClick={() =>
+                                                                            setIndex(index)
+                                                                        }
+                                                                    >
+                                                                        {item.name}
+                                                                    </Menu.Item>
+                                                                ))}
+                                                            </Menu.Dropdown>
+                                                        </Menu>
+                                                    )}
+                                                </div>
+                                                {blocks(0, 1)}
+                                                {app.blocks.length === 0 && (
+                                                    <Alert color="yellow">{c.unavailable}</Alert>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <Alert color="yellow">{c.unavailable}</Alert>
+                                        )}
+                                    </>
+                                )}
+                                {step === 1 && (
+                                    <>
+                                        <Text c="dimmed" size="sm" className={classes.chosenApp}>
+                                            {t(config.platforms[selectedPlatform]!.displayName)} ·{' '}
+                                            {app?.name}
+                                        </Text>
+                                        {blocks(1)}
+                                    </>
+                                )}
+                                {step === 2 && (
+                                    <Text c="dimmed">
+                                        {c.successText.replace('{app}', app?.name ?? c.app)}
+                                    </Text>
+                                )}
+                            </div>
+                        </section>
+                        <nav className={classes.wizardNavigation} aria-label={c.step}>
                             <Button
-                                variant="subtle"
+                                variant="default"
+                                disabled={step === 0}
                                 leftSection={<IconArrowLeft size={17} />}
                                 onClick={() => move(step - 1)}
                             >
                                 {c.back}
                             </Button>
-                        ) : (
-                            <span />
-                        )}
-                        <Button
-                            variant="subtle"
-                            leftSection={<IconHelpCircle size={17} />}
-                            onClick={() => setSupport(true)}
-                        >
-                            {c.support}
-                        </Button>
+                            <Button
+                                className={classes.continueButton}
+                                variant="default"
+                                disabled={step === 0 && !app?.blocks.length}
+                                rightSection={step < 2 ? <IconArrowRight size={18} /> : undefined}
+                                onClick={() => (step === 2 ? setWizard(false) : move(step + 1))}
+                            >
+                                {step === 2 ? c.returnToSubscription : c.finish}
+                            </Button>
+                        </nav>
                     </div>
-                    <ol className={classes.steps} aria-label={c.step}>
-                        {[c.install, c.import, c.complete].map((label, index) => (
-                            <li
-                                key={label}
-                                data-active={step >= index}
-                                aria-current={step === index ? 'step' : undefined}
-                            >
-                                <span>
-                                    {index < step ? <IconCheck size={14} /> : `0${index + 1}`}
-                                </span>
-                                {label}
-                            </li>
-                        ))}
-                    </ol>
-                    {subscription.user.userStatus !== 'ACTIVE' && (
-                        <Alert color="yellow" mb="lg">
-                            {c.warning}
-                        </Alert>
-                    )}
-                    {step === 0 && (
-                        <>
-                            <Title
-                                ref={stepHeading}
-                                tabIndex={-1}
-                                order={2}
-                                className={classes.stepTitle}
-                            >
-                                {c.platform}
-                            </Title>
-                            <div className={classes.platforms} role="group" aria-label={c.platform}>
-                                {available.map((key) => (
-                                    <UnstyledButton
-                                        aria-pressed={key === selectedPlatform}
-                                        className={classes.platform}
-                                        key={key}
-                                        onClick={() => {
-                                            setPlatform(key)
-                                            setIndex(recommendedIndex(config.platforms[key]!.apps))
-                                            setAlternatives(false)
-                                            move(0)
-                                        }}
-                                    >
-                                        <span
-                                            aria-hidden="true"
-                                            dangerouslySetInnerHTML={{
-                                                __html:
-                                                    getIconFromLibrary(
-                                                        config.platforms[key]!.svgIconKey,
-                                                        config.svgLibrary
-                                                    ) || ''
-                                            }}
-                                        />
-                                        {t(config.platforms[key]!.displayName)}
-                                    </UnstyledButton>
-                                ))}
-                            </div>
-                            {app ? (
-                                <>
-                                    <div className={classes.selectedApp}>
-                                        <div>
-                                            <Text size="xs" c="dimmed">
-                                                {c.app}
-                                            </Text>
-                                            <Title order={2}>{app.name}</Title>
-                                        </div>
-                                        {selectedIndex === recommendedIndex(apps) && (
-                                            <Badge variant="light">{c.recommended}</Badge>
-                                        )}
-                                    </div>
-                                    {apps.length > 1 && (
-                                        <>
-                                            <Button
-                                                variant="subtle"
-                                                size="sm"
-                                                className={classes.alternativeToggle}
-                                                rightSection={<IconChevronDown size={15} />}
-                                                aria-expanded={alternatives}
-                                                onClick={() => setAlternatives(!alternatives)}
-                                            >
-                                                {c.choose}
-                                            </Button>
-                                            {alternatives && (
-                                                <div
-                                                    className={classes.alternatives}
-                                                    role="group"
-                                                    aria-label={c.choose}
-                                                >
-                                                    {apps.map((item, index) => (
-                                                        <Button
-                                                            variant={
-                                                                index === selectedIndex
-                                                                    ? 'filled'
-                                                                    : 'light'
-                                                            }
-                                                            aria-pressed={index === selectedIndex}
-                                                            key={item.name}
-                                                            onClick={() => {
-                                                                setIndex(index)
-                                                                setAlternatives(false)
-                                                                move(0)
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                            {index === recommendedIndex(apps)
-                                                                ? ` · ${c.recommended}`
-                                                                : ''}
-                                                        </Button>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                    <Text c="dimmed" size="sm" mb="lg">
-                                        {c.preparing}
-                                    </Text>
-                                    {blocks(0, 1)}
-                                    {app.blocks.length > 0 ? (
-                                        <Button
-                                            size="lg"
-                                            fullWidth
-                                            mt="xl"
-                                            variant="light"
-                                            onClick={() => move(1)}
-                                            rightSection={<IconArrowRight size={18} />}
-                                        >
-                                            {c.installed}
-                                        </Button>
-                                    ) : (
-                                        <Alert color="yellow">{c.unavailable}</Alert>
-                                    )}
-                                </>
-                            ) : (
-                                <Alert color="yellow">
-                                    {c.unavailable}
-                                    <Button onClick={() => setSupport(true)}>{c.support}</Button>
-                                </Alert>
-                            )}
-                        </>
-                    )}
-                    {step === 1 && (
-                        <>
-                            <Title
-                                ref={stepHeading}
-                                tabIndex={-1}
-                                order={2}
-                                className={classes.stepTitle}
-                            >
-                                {c.add}
-                            </Title>
-                            <Text c="dimmed" mb="xl">
-                                {c.addText}
-                            </Text>
-                            {blocks(1)}
-                            <Stack gap="sm" mt="lg">
-                                <Button variant="light" size="md" onClick={copy}>
-                                    {c.copy}
-                                </Button>
-                                <Button
-                                    variant="default"
-                                    size="md"
-                                    onClick={() => setQr(!qr)}
-                                    aria-expanded={qr}
-                                >
-                                    {c.qr}
-                                </Button>
-                            </Stack>
-                            {qr && (
-                                <div className={classes.qr}>
-                                    <Image
-                                        alt={c.qrHint}
-                                        w={200}
-                                        h={200}
-                                        src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(subscriptionUrl, { whiteColor: '#ffffff', blackColor: '#09190f', border: 3 }))}`}
-                                    />
-                                    <Text size="sm" c="dimmed">
-                                        {c.qrHint}
-                                    </Text>
-                                </div>
-                            )}
-                            <Accordion mt="md" variant="separated">
-                                <Accordion.Item value="advanced">
-                                    <Accordion.Control>{c.advanced}</Accordion.Control>
-                                    <Accordion.Panel>
-                                        <Text component="code" className={classes.rawLink}>
-                                            {subscriptionUrl}
-                                        </Text>
-                                        <Text c="dimmed" size="xs" my="md">
-                                            {c.privateLink}
-                                        </Text>
-                                        <RawKeysWidget isMobile={isMobile} />
-                                    </Accordion.Panel>
-                                </Accordion.Item>
-                            </Accordion>
-                            <Button
-                                variant="filled"
-                                size="lg"
-                                fullWidth
-                                mt="xl"
-                                onClick={() => move(2)}
-                                rightSection={<IconArrowRight size={18} />}
-                            >
-                                {c.finish}
-                            </Button>
-                        </>
-                    )}
-                    {step === 2 && (
-                        <div className={classes.completion}>
-                            <div className={classes.successMark}>
-                                <IconShieldCheck size={68} stroke={1.4} />
-                            </div>
-                            <Title ref={stepHeading} tabIndex={-1} order={2}>
-                                {c.success}
-                            </Title>
-                            <Text c="dimmed" mt="sm" mb="xl">
-                                {c.successText}
-                            </Text>
-                            <Button
-                                variant="filled"
-                                size="lg"
-                                fullWidth
-                                onClick={() => setWizard(false)}
-                            >
-                                {c.close}
-                            </Button>
-                            {supportSection}
-                        </div>
-                    )}
                 </div>
+                <footer className={classes.wizardFooter}>
+                    <Text size="sm" c="dimmed">
+                        {c.helpMain}
+                    </Text>
+                    <Button variant="subtle" size="sm" onClick={() => setSupport(true)}>
+                        {c.support}
+                    </Button>
+                </footer>
             </Modal>
             <Modal
                 closeOnEscape={!support}
@@ -603,11 +548,11 @@ export function DashboardWidget({
                 size="lg"
                 closeButtonProps={{ 'aria-label': c.close }}
             >
-                <Stack gap="lg">
+                <Stack gap="lg" aria-busy={loading}>
                     <Text c="dimmed" size="sm">
                         {c.deviceHint}
                     </Text>
-                    {loading && (
+                    {loading && !devices && !deviceError && (
                         <Group role="status">
                             <Loader size="sm" />
                             <Text>{c.loading}</Text>
@@ -621,6 +566,7 @@ export function DashboardWidget({
                             <Button
                                 mt="sm"
                                 variant="light"
+                                loading={loading}
                                 onClick={() =>
                                     deviceError === 'expired'
                                         ? window.location.reload()
@@ -677,14 +623,15 @@ export function DashboardWidget({
                                     </Card>
                                 ))
                             )}
-                            <Button variant="light" onClick={() => void loadDevices()}>
+                            <Button
+                                variant="light"
+                                loading={loading}
+                                onClick={() => void loadDevices()}
+                            >
                                 {c.retry}
                             </Button>
                         </>
                     )}
-                    <Button variant="subtle" onClick={() => setSupport(true)}>
-                        {c.support}
-                    </Button>
                 </Stack>
             </Modal>
             <Modal

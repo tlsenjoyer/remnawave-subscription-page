@@ -15,6 +15,7 @@
   "type": "module",
   "scripts": {
     "start:dev": "vite",
+    "start:live": "node scripts/live-server.mjs",
     "start:build": "NODE_ENV=production tsc && vite build",
     "cb": "vite build",
     "start:preview": "vite preview --port 3334",

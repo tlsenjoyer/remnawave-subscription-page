@@ -1,5 +1,9 @@
 import { GetSubscriptionInfoByShortUuidCommand } from '@remnawave/backend-contract'
 
 export interface IState {
-    subscription: GetSubscriptionInfoByShortUuidCommand.Response['response'] | null
+    subscription:
+        | (GetSubscriptionInfoByShortUuidCommand.Response['response'] & {
+              planName?: string
+          })
+        | null
 }

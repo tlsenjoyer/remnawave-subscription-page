@@ -1,33 +1,50 @@
 import type { CSSProperties } from 'react'
 
-import { Badge, Card, Collapse, Group, Popover, Stack, Text, UnstyledButton } from '@mantine/core'
 import {
-    IconAlertCircle,
-    IconCalendar,
-    IconCheck,
-    IconChevronDown,
-    IconX
-} from '@tabler/icons-react'
-import { useId, useState } from 'react'
+    Badge,
+    Button,
+    Card,
+    Group,
+    Image,
+    Input,
+    Modal,
+    Popover,
+    Stack,
+    Text,
+    UnstyledButton
+} from '@mantine/core'
+import { notifications } from '@mantine/notifications'
+import { IconAlertCircle, IconCheck, IconCopy, IconQrcode, IconX } from '@tabler/icons-react'
+import { useState } from 'react'
+import { renderSVG } from 'uqr'
 
 import { useTranslation } from '@shared/hooks'
 import { formatDate } from '@shared/utils/config-parser'
-import { vibrate } from '@shared/utils/vibrate'
+import { constructSubscriptionUrl } from '@shared/utils/construct-subscription-url'
 
 import { useSubscription } from '@entities/subscription-info-store'
 
+import { getDashboardCopy } from '../dashboard/dashboard-copy'
 import { getResetCaption, getTrafficCopy } from './traffic-copy'
 import classes from './traffic-summary.module.css'
 import { formatExactBytes, formatTrafficBytes, getTrafficMetrics } from './traffic.utils'
 
-export function TrafficSummaryWidget({ variant }: { variant: 'collapsed' | 'expanded' | 'cards' }) {
-    const { user } = useSubscription()
+export function TrafficSummaryWidget() {
+    const { user, planName } = useSubscription()
     const { t, currentLang, baseTranslations } = useTranslation()
-    const [expanded, setExpanded] = useState(false)
     const [exactOpen, setExactOpen] = useState(false)
-    const detailsId = useId()
-    const toggleId = useId()
+    const [qrOpen, setQrOpen] = useState(false)
     const labels = getTrafficCopy(currentLang)
+    const c = getDashboardCopy(currentLang)
+    const subscriptionUrl = constructSubscriptionUrl(window.location.href, user.shortUuid)
+    const copy = async () => {
+        try {
+            await navigator.clipboard.writeText(subscriptionUrl)
+            notifications.show({ message: c.copied, color: 'green' })
+        } catch {
+            notifications.show({ message: c.copyFailed, color: 'yellow' })
+        }
+    }
     const traffic = getTrafficMetrics(user)
     const status = {
         ACTIVE: { text: t(baseTranslations.active), color: 'green', icon: IconCheck },
@@ -43,152 +60,141 @@ export function TrafficSummaryWidget({ variant }: { variant: 'collapsed' | 'expa
             {status.text}
         </Badge>
     )
-    const details = (
-        <div className={classes.detailGrid}>
-            <div className={classes.detail}>
-                <Text c="dimmed" size="xs">
-                    {t(baseTranslations.status)}
-                </Text>
-                <div className={classes.detailValue}>{statusBadge}</div>
-            </div>
-            <div className={classes.detail}>
-                <Group gap={6}>
-                    <IconCalendar size={14} />
-                    <Text c="dimmed" size="xs">
-                        {t(baseTranslations.expires)}
-                    </Text>
-                </Group>
-                <div className={classes.detailValue}>
-                    {formatDate(user.expiresAt, currentLang, baseTranslations)}
-                </div>
-            </div>
-        </div>
-    )
+    const expiryDate = formatDate(user.expiresAt, currentLang, baseTranslations)
+    const expiry =
+        expiryDate === t(baseTranslations.indefinitely)
+            ? expiryDate
+            : `${currentLang === 'ru' ? 'Действует до' : t(baseTranslations.expires)} ${expiryDate}`
     const summary = (
-        <Card
-            className={`${classes.card} ${variant === 'cards' ? classes.trafficCard : ''}`}
-            data-status={user.userStatus}
-            p={0}
-        >
-            <div className={classes.triggerArea}>
-                {variant === 'collapsed' && (
-                    <UnstyledButton
-                        className={classes.summaryToggle}
-                        id={toggleId}
-                        aria-controls={detailsId}
-                        aria-expanded={expanded}
-                        aria-label={expanded ? labels.hide : labels.show}
-                        onClick={() => {
-                            vibrate('tap')
-                            setExpanded(!expanded)
-                        }}
-                    />
-                )}
-                <div className={classes.summary}>
-                    <Group justify="space-between" gap="sm">
-                        <Text className={classes.heading}>{t(baseTranslations.bandwidth)}</Text>
-                        {statusBadge}
-                    </Group>
-                    <div className={classes.usageRow}>
-                        <Stack gap={2}>
+        <Card className={classes.card} data-status={user.userStatus} p={0}>
+            <div className={classes.summary}>
+                <Group justify="space-between" gap="sm">
+                    <Text className={classes.heading}>{planName?.trim() || 'Бета тест'}</Text>
+                    {statusBadge}
+                </Group>
+                <Text size="xs" c="dimmed" mt={4}>
+                    {expiry}
+                </Text>
+                <div className={classes.usageRow}>
+                    <Stack gap={2}>
+                        <Text c="dimmed" size="xs">
+                            {t(baseTranslations.bandwidth)}
+                        </Text>
+                        {traffic.unlimited && (
                             <Text c="dimmed" size="xs">
-                                {getResetCaption(user.trafficLimitStrategy, currentLang)}
+                                {labels.unlimited}
                             </Text>
-                            {traffic.unlimited && (
-                                <Text c="dimmed" size="xs">
-                                    {labels.unlimited}
-                                </Text>
-                            )}
-                            {traffic.percentage !== null && traffic.percentage >= 100 && (
-                                <Text c="red.3" size="xs">
-                                    {labels.exhausted}
-                                </Text>
-                            )}
-                        </Stack>
-                        <Popover
-                            opened={exactOpen}
-                            onChange={setExactOpen}
-                            position="bottom-end"
-                            withArrow
-                        >
-                            <Popover.Target>
-                                <UnstyledButton
-                                    className={classes.amount}
-                                    aria-label={`${labels.exact}: ${usage}`}
-                                    onMouseEnter={() => setExactOpen(true)}
-                                    onMouseLeave={() => setExactOpen(false)}
-                                    onFocus={() => setExactOpen(true)}
-                                    onBlur={() => setExactOpen(false)}
-                                    onClick={() => setExactOpen(true)}
-                                >
-                                    {usage}
-                                </UnstyledButton>
-                            </Popover.Target>
-                            <Popover.Dropdown className={classes.popover}>
-                                <Text size="xs">{labels.exact}</Text>
-                                <Text size="sm" dir="ltr">
-                                    {exact}
-                                </Text>
-                            </Popover.Dropdown>
-                        </Popover>
-                    </div>
-                    <div
-                        className={classes.track}
-                        role="progressbar"
-                        aria-label={t(baseTranslations.bandwidth)}
-                        aria-valuemin={0}
-                        aria-valuemax={traffic.unlimited ? undefined : 100}
-                        aria-valuenow={traffic.percentage === null ? undefined : traffic.progress}
-                        aria-valuetext={
-                            traffic.unlimited ? `${usage} — ${labels.unlimited}` : usage
-                        }
+                        )}
+                        {traffic.percentage !== null && traffic.percentage >= 100 && (
+                            <Text c="red.3" size="xs">
+                                {labels.exhausted}
+                            </Text>
+                        )}
+                    </Stack>
+                    <Popover
+                        opened={exactOpen}
+                        onChange={setExactOpen}
+                        position="bottom-end"
+                        withArrow
                     >
-                        <div
-                            className={classes.fill}
-                            data-usage-color={traffic.color}
-                            style={
-                                {
-                                    width: `${traffic.progress}%`,
-                                    '--usage-color': `var(--mantine-color-${traffic.color}-${traffic.color === 'yellow' ? 3 : 5})`
-                                } as CSSProperties
-                            }
-                        />
-                    </div>
+                        <Popover.Target>
+                            <UnstyledButton
+                                className={classes.amount}
+                                aria-label={`${labels.exact}: ${usage}`}
+                                onMouseEnter={() => setExactOpen(true)}
+                                onMouseLeave={() => setExactOpen(false)}
+                                onFocus={() => setExactOpen(true)}
+                                onBlur={() => setExactOpen(false)}
+                                onClick={() => setExactOpen(true)}
+                            >
+                                {usage}
+                            </UnstyledButton>
+                        </Popover.Target>
+                        <Popover.Dropdown className={classes.popover}>
+                            <Text size="xs">{labels.exact}</Text>
+                            <Text size="sm" dir="ltr">
+                                {exact}
+                            </Text>
+                        </Popover.Dropdown>
+                    </Popover>
                 </div>
-                {variant === 'collapsed' && (
-                    <div className={classes.toggle} aria-hidden="true">
-                        {expanded ? labels.hide : labels.show}
-                        <IconChevronDown
-                            className={classes.chevron}
-                            size={17}
-                            style={{ transform: expanded ? 'rotate(180deg)' : undefined }}
+                <div
+                    className={classes.track}
+                    role="progressbar"
+                    aria-label={t(baseTranslations.bandwidth)}
+                    aria-valuemin={0}
+                    aria-valuemax={traffic.unlimited ? undefined : 100}
+                    aria-valuenow={traffic.percentage === null ? undefined : traffic.progress}
+                    aria-valuetext={traffic.unlimited ? `${usage} — ${labels.unlimited}` : usage}
+                >
+                    <div
+                        className={classes.fill}
+                        data-usage-color={traffic.color}
+                        style={
+                            {
+                                width: `${traffic.progress}%`,
+                                '--usage-color': `var(--mantine-color-${traffic.color}-${traffic.color === 'yellow' ? 3 : 5})`
+                            } as CSSProperties
+                        }
+                    />
+                </div>
+                <Text c="dimmed" size="xs" mt="sm">
+                    {getResetCaption(user.trafficLimitStrategy, currentLang)}
+                </Text>
+                <div className={classes.linkControls}>
+                    <div className={classes.linkRow}>
+                        <Input
+                            className={classes.linkField}
+                            classNames={{ input: classes.linkInput }}
+                            aria-label={c.copy}
+                            value={subscriptionUrl}
+                            readOnly
+                            dir="ltr"
+                            onFocus={(event) => event.currentTarget.select()}
                         />
-                    </div>
-                )}
-            </div>
-            {variant === 'collapsed' && (
-                <>
-                    <Collapse expanded={expanded} keepMounted>
-                        <div
-                            className={classes.details}
-                            id={detailsId}
-                            role="region"
-                            aria-labelledby={toggleId}
+                        <Button
+                            variant="default"
+                            aria-label={c.copy}
+                            onClick={copy}
+                            leftSection={<IconCopy size={16} />}
                         >
-                            {details}
-                        </div>
-                    </Collapse>
-                </>
-            )}
-            {variant === 'expanded' && <div className={classes.details}>{details}</div>}
+                            {c.copyShort}
+                        </Button>
+                    </div>
+                    <Button
+                        fullWidth
+                        variant="default"
+                        onClick={() => setQrOpen(true)}
+                        leftSection={<IconQrcode size={17} />}
+                    >
+                        {c.qr}
+                    </Button>
+                </div>
+            </div>
         </Card>
     )
-    return variant === 'cards' ? (
-        <div className={classes.cards}>
+    return (
+        <>
+            <Modal
+                opened={qrOpen}
+                onClose={() => setQrOpen(false)}
+                title={c.qr}
+                centered
+                closeButtonProps={{ 'aria-label': c.close }}
+            >
+                <div className={classes.qr}>
+                    <Image
+                        alt={c.qrHint}
+                        w={224}
+                        h={224}
+                        src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(subscriptionUrl, { whiteColor: '#ffffff', blackColor: '#09190f', border: 3 }))}`}
+                    />
+                    <Text size="sm" c="dimmed">
+                        {c.qrHint}
+                    </Text>
+                </div>
+            </Modal>
             {summary}
-            {details}
-        </div>
-    ) : (
-        summary
+        </>
     )
 }

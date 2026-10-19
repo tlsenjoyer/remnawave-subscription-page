@@ -8,7 +8,7 @@ async function openPage(page: Page, { config = makeConfig(), user = {}, locale =
     await page.addInitScript((lang) => localStorage.setItem('i18nextLng', lang), locale)
     await page.route('**/assets/.app-config-v2.json?*', (route) => route.fulfill({ json: config }))
     await page.route('**/demo', async (route) => {
-        const response = await route.fetch()
+        const response = await route.fetch({ url: new URL('/', route.request().url()).href })
         const html = (await response.text()).replace(
             /data-panel="[^"]*"/,
             `data-panel="${Buffer.from(JSON.stringify(makeSubscription(user))).toString('base64')}"`
@@ -21,7 +21,7 @@ async function openPage(page: Page, { config = makeConfig(), user = {}, locale =
     ).toBeVisible()
 }
 async function wizard(page: Page) {
-    await page.getByRole('button', { name: 'Connect a new device', exact: true }).click()
+    await page.getByRole('button', { name: 'Connect a device', exact: true }).click()
     return page.getByRole('dialog', { name: 'Connection setup', exact: true })
 }
 
@@ -32,12 +32,9 @@ test('traffic remains accessible and username is absent', async ({ page }) => {
         '0'
     )
     await expect(page.getByText('never-display-this-username')).toHaveCount(0)
-    const toggle = page.getByRole('button', { name: 'Show details', exact: true })
-    await toggle.press('Enter')
-    await expect(page.getByRole('region')).toBeVisible()
-    await expect(page.getByText('Expiry date')).toBeVisible()
-    await page.getByRole('button', { name: 'Hide details', exact: true }).press('Space')
-    await expect(page.getByRole('region')).not.toBeVisible()
+    await expect(page.getByText('Expiry date 8 April 2027', { exact: true })).toBeVisible()
+    await expect(page.getByText('Active', { exact: true })).toHaveCount(1)
+    await expect(page.getByRole('button', { name: 'Show details', exact: true })).toHaveCount(0)
     await page.getByRole('button', { name: /Exact usage/ }).focus()
     await expect(page.getByText('0 / 26,843,545,600', { exact: true })).toBeVisible()
 })
@@ -55,9 +52,7 @@ for (const status of ['ACTIVE', 'EXPIRED', 'LIMITED', 'DISABLED'])
         const dialog = await wizard(page)
         if (status !== 'ACTIVE')
             await expect(dialog.getByText(/Your subscription is not active/)).toBeVisible()
-        await expect(
-            dialog.getByRole('button', { name: 'The app is installed, next' })
-        ).toBeVisible()
+        await expect(dialog.getByRole('button', { name: 'Continue' })).toBeVisible()
     })
 for (const layout of ['collapsed', 'expanded', 'cards', 'hidden'])
     test(`legacy subscription selector ${layout}`, async ({ page }) => {
@@ -69,7 +64,7 @@ for (const layout of ['collapsed', 'expanded', 'cards', 'hidden'])
         )
         if (layout !== 'hidden')
             await expect(
-                page.getByRole('button', { name: 'Show details', exact: true })
+                page.getByRole('button', { name: 'Show QR code', exact: true })
             ).toBeVisible()
     })
 const matrix = {
@@ -91,11 +86,12 @@ for (const [platform, apps] of Object.entries(matrix))
         if (apps.length > 1) {
             for (const app of apps.slice(1)) {
                 await dialog.getByRole('button', { name: 'Choose another app' }).click()
-                await dialog.getByRole('button', { name: app, exact: true }).click()
+                await page.getByRole('menuitem', { name: app, exact: true }).click()
                 await expect(dialog.getByRole('heading', { name: app, exact: true })).toBeVisible()
+                await expect(page.getByRole('menu')).toHaveCount(0)
             }
         }
-        await dialog.getByRole('button', { name: 'The app is installed, next' }).click()
+        await dialog.getByRole('button', { name: 'Continue' }).click()
         await expect(
             dialog.getByRole('heading', { name: 'Add your subscription', exact: true })
         ).toBeFocused()
@@ -103,31 +99,36 @@ for (const [platform, apps] of Object.entries(matrix))
         await dialog.getByRole('button', { name: 'Back', exact: true }).click()
         await expect(dialog.getByRole('heading', { name: apps.at(-1), exact: true })).toBeVisible()
     })
-test('copy, QR, raw keys, completion, nested support and reopen', async ({ page }, info) => {
+test('main page copy and QR, completion, nested support and reopen', async ({ page }, info) => {
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
     await openPage(page)
-    await expect(page.getByRole('button', { name: /Copy subscription link/ })).toHaveCount(0)
+    const link = page.getByRole('textbox', { name: 'Copy subscription link', exact: true })
+    await expect(link).toHaveValue('http://127.0.0.1:3334/demo')
+    await page.getByRole('button', { name: 'Copy subscription link', exact: true }).click()
+    await expect
+        .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+        .toBe(await link.inputValue())
+    const qrTrigger = page.getByRole('button', { name: 'Show QR code', exact: true })
+    await qrTrigger.click()
+    const qr = page.getByRole('dialog', { name: 'Show QR code', exact: true })
+    await expect(qr.getByRole('img', { name: /Scan in your VPN app/ })).toBeVisible()
+    await qr
+        .getByRole('img', { name: /Scan in your VPN app/ })
+        .screenshot({ path: info.outputPath('qr.png') })
+    await page.keyboard.press('Escape')
+    await expect(qrTrigger).toBeFocused()
     const dialog = await wizard(page)
     await dialog.getByRole('button', { name: 'Android', exact: true }).click()
-    await dialog.getByRole('button', { name: 'The app is installed, next' }).click()
+    await dialog.getByRole('button', { name: 'Continue' }).click()
     await expect(dialog.getByRole('link', { name: 'Add to incy', exact: true })).toHaveAttribute(
         'href',
         'incy://import/http://127.0.0.1:3334/demo'
     )
-    await dialog.getByRole('button', { name: 'Copy subscription link', exact: true }).click()
-    await expect
-        .poll(() => page.evaluate(() => navigator.clipboard.readText()))
-        .toBe('http://127.0.0.1:3334/demo')
-    await dialog.getByRole('button', { name: /Show QR code/ }).click()
-    await expect(dialog.getByRole('img', { name: /Scan in your VPN app/ })).toBeVisible()
-    await dialog
-        .getByRole('img', { name: /Scan in your VPN app/ })
-        .screenshot({ path: info.outputPath('qr.png') })
-    await dialog.getByRole('button', { name: 'Advanced connection options' }).click()
-    await dialog.getByRole('button', { name: 'Copy link: Example location', exact: true }).click()
-    await expect
-        .poll(() => page.evaluate(() => navigator.clipboard.readText()))
-        .toBe('vless://fixture@example.com:443#Example%20location')
+    await expect(
+        dialog.getByRole('button', { name: 'Copy subscription link', exact: true })
+    ).toHaveCount(0)
+    await expect(dialog.getByRole('button', { name: /Show QR code/ })).toHaveCount(0)
+    await expect(dialog.getByRole('button', { name: 'Advanced connection options' })).toHaveCount(0)
     await dialog.getByRole('button', { name: 'Support', exact: true }).click()
     const support = page.getByRole('dialog', { name: 'Support', exact: true })
     await expect(support.getByRole('link', { name: 'support@tovarish.net' })).toHaveAttribute(
@@ -142,16 +143,18 @@ test('copy, QR, raw keys, completion, nested support and reopen', async ({ page 
     await expect(
         dialog.getByRole('heading', { name: 'Add your subscription', exact: true })
     ).toBeVisible()
-    await dialog.getByRole('button', { name: 'Done', exact: true }).click()
-    await expect(dialog.getByRole('heading', { name: 'Done, you’re connected' })).toBeVisible()
-    await expect(dialog.getByRole('link', { name: 'support@tovarish.net' })).toBeVisible()
+    await dialog.getByRole('button', { name: 'Continue', exact: true }).click()
+    await expect(dialog.getByRole('heading', { name: 'Setup complete' })).toBeVisible()
+    await expect(dialog.getByText('Open incy and enable the VPN.', { exact: true })).toBeVisible()
+    await expect(dialog.getByRole('link', { name: 'support@tovarish.net' })).toHaveCount(0)
+    await dialog.getByRole('button', { name: 'Support', exact: true }).click()
+    await expect(support.getByRole('link', { name: 'support@tovarish.net' })).toBeVisible()
+    await page.keyboard.press('Escape')
     await page.screenshot({ path: info.outputPath('completion.png'), fullPage: true })
-    await dialog.getByRole('button', { name: 'Close', exact: true }).last().click()
-    await expect(
-        page.getByRole('button', { name: 'Connect a new device', exact: true })
-    ).toBeFocused()
+    await dialog.getByRole('button', { name: 'Return to subscription', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Connect a device', exact: true })).toBeFocused()
     const reopened = await wizard(page)
-    await expect(reopened.getByRole('heading', { name: 'Choose your device' })).toBeVisible()
+    await expect(reopened.getByRole('heading', { name: 'Install the app' })).toBeVisible()
     await expect(reopened.getByRole('button', { name: 'Android', exact: true })).toHaveAttribute(
         'aria-pressed',
         'true'
@@ -161,12 +164,36 @@ test('query imports encode the complete subscription URL', async ({ page }) => {
     await openPage(page)
     const dialog = await wizard(page)
     await dialog.getByRole('button', { name: 'Linux', exact: true }).click()
-    await dialog.getByRole('button', { name: 'The app is installed, next' }).click()
+    await dialog.getByRole('button', { name: 'Continue' }).click()
     await expect(dialog.getByRole('link', { name: 'Add to Koala Clash' })).toHaveAttribute(
         'href',
         'koala-clash://install-config?url=http%3A%2F%2F127.0.0.1%3A3334%2Fdemo'
     )
 })
+for (const locale of ['en', 'ru'])
+    test(`download labels come entirely from the panel in ${locale}`, async ({ page }) => {
+        const config = makeConfig()
+        const buttons = config.platforms.android.apps[0].blocks[0].buttons
+        for (const [index, button] of buttons.entries()) {
+            button.text.en = `Get the client — route ${index + 1}`
+            button.text.ru = `Получить приложение — способ ${index + 1}`
+        }
+        await openPage(page, { config, locale })
+        await page
+            .getByRole('button', {
+                name: locale === 'ru' ? 'Подключить устройство' : 'Connect a device',
+                exact: true
+            })
+            .click()
+        const dialog = page.getByRole('dialog')
+        await dialog.getByRole('button', { name: 'Android', exact: true }).click()
+        for (const button of buttons) {
+            const link = dialog.getByRole('link', { name: button.text[locale], exact: true })
+            await expect(link).toHaveAttribute('href', button.link)
+            await expect(link.locator('svg')).toHaveCount(1)
+        }
+    })
+
 test('panel branding, instructions, empty configuration and featured fallback', async ({
     page
 }) => {
@@ -207,8 +234,8 @@ for (const result of ['ok', 'empty', 'error', 'expired'])
                 }
             })
         )
-        await page.getByRole('button', { name: 'Devices', exact: true }).click()
-        const dialog = page.getByRole('dialog', { name: 'Devices', exact: true })
+        await page.getByRole('button', { name: 'Your devices', exact: true }).click()
+        const dialog = page.getByRole('dialog', { name: 'Your devices', exact: true })
         if (result === 'ok') {
             await expect(dialog.getByText('Test phone')).toBeVisible()
             await expect(dialog.getByText('No device limit')).toBeVisible()
@@ -227,7 +254,6 @@ test('Russian unlimited and indefinite expiry', async ({ page }) => {
     })
     await expect(page.getByText('Безлимитный трафик')).toBeVisible()
     await expect(page.getByText('Сброс ежемесячно')).toBeVisible()
-    await page.getByRole('button', { name: 'Подробнее', exact: true }).click()
     await expect(page.getByText('Бессрочно')).toBeVisible()
 })
 test('mobile/tablet/desktop: primary action, platforms, RTL and reduced motion', async ({
@@ -242,7 +268,7 @@ test('mobile/tablet/desktop: primary action, platforms, RTL and reduced motion',
     ] as const) {
         await page.setViewportSize({ width, height })
         const bounds = await page
-            .getByRole('button', { name: 'Подключить новое устройство', exact: true })
+            .getByRole('button', { name: 'Подключить устройство', exact: true })
             .boundingBox()
         expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(height)
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -250,7 +276,7 @@ test('mobile/tablet/desktop: primary action, platforms, RTL and reduced motion',
         )
         await page.screenshot({ path: info.outputPath(`${name}.png`), fullPage: true })
     }
-    await page.getByRole('button', { name: 'Подключить новое устройство', exact: true }).click()
+    await page.getByRole('button', { name: 'Подключить устройство', exact: true }).click()
     const platformButtons = page
         .getByRole('group', { name: 'Выберите устройство' })
         .getByRole('button')
@@ -265,7 +291,7 @@ test('mobile/tablet/desktop: primary action, platforms, RTL and reduced motion',
     await page.getByRole('menuitem', { name: /فارسی/ }).click()
     await expect(page.locator('[dir="rtl"]').first()).toBeAttached()
 })
-test('touch accordion and wizard', async ({ browser }) => {
+test('touch traffic tooltip, QR popup and wizard', async ({ browser }) => {
     const context = await browser.newContext({
         hasTouch: true,
         viewport: { width: 390, height: 844 }
@@ -274,9 +300,10 @@ test('touch accordion and wizard', async ({ browser }) => {
     await openPage(page)
     await page.getByRole('button', { name: /Exact usage/ }).tap()
     await expect(page.getByText('0 / 26,843,545,600', { exact: true })).toBeVisible()
-    await page.getByRole('button', { name: 'Show details', exact: true }).tap()
-    await expect(page.getByRole('region')).toBeVisible()
-    await page.getByRole('button', { name: 'Connect a new device', exact: true }).tap()
+    await page.getByRole('button', { name: 'Show QR code', exact: true }).tap()
+    await expect(page.getByRole('dialog', { name: 'Show QR code', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await page.getByRole('button', { name: 'Connect a device', exact: true }).tap()
     await expect(page.getByRole('dialog', { name: 'Connection setup' })).toBeVisible()
     await context.close()
 })
@@ -284,8 +311,6 @@ test('touch accordion and wizard', async ({ browser }) => {
 test('Russian mobile setup actions wrap without clipping', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 })
     await openPage(page, { locale: 'ru' })
-    await page.getByRole('button', { name: 'Подключить новое устройство', exact: true }).click()
-    await page.getByRole('button', { name: 'Приложение установлено, дальше' }).click()
     const qr = page.getByRole('button', { name: /Показать QR-код/ })
     await expect(qr).toBeVisible()
     const clipped = await qr.evaluate((el) =>
@@ -301,4 +326,489 @@ test('Russian mobile setup actions wrap without clipping', async ({ page }) => {
             name: 'Отсканируйте код в VPN-приложении, чтобы добавить подписку.'
         })
     ).toBeVisible()
+    await page.keyboard.press('Escape')
+    await page.getByRole('button', { name: 'Подключить устройство', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Настройка подключения', exact: true })
+    await expect(dialog.getByRole('button', { name: 'Назад', exact: true })).toBeDisabled()
+    const footer = dialog.locator('footer')
+    const next = dialog.getByRole('button', { name: 'Продолжить', exact: true })
+    const initialFooter = (await footer.boundingBox())!
+    const initialNext = (await next.boundingBox())!
+    expect(initialFooter.y).toBeGreaterThan(initialNext.y + initialNext.height)
+    expect(initialFooter.y + initialFooter.height).toBeGreaterThanOrEqual(640)
+    await footer.scrollIntoViewIfNeeded()
+    const footerBounds = (await footer.boundingBox())!
+    expect(footerBounds.y + footerBounds.height).toBeCloseTo(640, 0)
+    expect(footerBounds.y).toBeLessThan(initialFooter.y)
+    const nextBounds = (await next.boundingBox())!
+    expect(nextBounds.y + nextBounds.height).toBeLessThanOrEqual(footerBounds.y)
+    await next.click()
+    await next.click()
+    await expect(
+        dialog.getByRole('button', { name: 'Вернуться к подписке', exact: true })
+    ).toBeVisible()
+    await expect(
+        page.getByRole('heading', { name: 'Настройка завершена', exact: true })
+    ).toBeVisible()
+})
+
+test('appearance follows the device until a saved override is chosen', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' })
+    await openPage(page)
+    const root = page.locator('html')
+    const appearance = page.getByRole('button', { name: 'Dark appearance', exact: true })
+    await expect(root).toHaveAttribute('data-mantine-color-scheme', 'dark')
+    await expect(appearance).toHaveAttribute('aria-pressed', 'true')
+    await page.emulateMedia({ colorScheme: 'light' })
+    await expect(root).toHaveAttribute('data-mantine-color-scheme', 'light')
+    await appearance.click()
+    await expect(root).toHaveAttribute('data-mantine-color-scheme', 'dark')
+    await page.reload()
+    await expect(root).toHaveAttribute('data-mantine-color-scheme', 'dark')
+    await page.getByRole('button', { name: 'Show QR code', exact: true }).click()
+    await expect(
+        page.getByRole('dialog').getByRole('img', { name: /Scan in your VPN app/ })
+    ).toBeVisible()
+    await page.keyboard.press('Escape')
+    const dialog = await wizard(page)
+    await dialog.getByRole('button', { name: 'Continue' }).click()
+    await expect(dialog.getByRole('button', { name: 'Advanced connection options' })).toHaveCount(0)
+})
+
+for (const mobile of [false, true])
+    test.describe(`waves on ${mobile ? 'mobile' : 'desktop'}`, () => {
+        test.use({ hasTouch: mobile, viewport: { width: mobile ? 390 : 1280, height: 844 } })
+
+        test('frame cap and pointer input', async ({ page }) => {
+            await page.emulateMedia({ reducedMotion: 'no-preference' })
+            await page.addInitScript(() => {
+                const request = window.requestAnimationFrame.bind(window)
+                window.requestAnimationFrame = (callback) => {
+                    if (callback.name !== 'tick') return request(callback)
+                    Reflect.set(window, 'waveTick', callback)
+                    return 0
+                }
+            })
+            await openPage(page)
+            const result = await page.evaluate(() => {
+                let points: number[][] = []
+                const curve = CanvasRenderingContext2D.prototype.quadraticCurveTo
+                CanvasRenderingContext2D.prototype.quadraticCurveTo = function (x, y, endX, endY) {
+                    if (this.canvas.classList.contains('animated-background')) points.push([x, y])
+                    return curve.call(this, x, y, endX, endY)
+                }
+                let time = performance.now()
+                const step = (elapsed = 40) => {
+                    points = []
+                    time += elapsed
+                    Reflect.get(window, 'waveTick')(time)
+                    return points
+                }
+                const move = (x: number, y: number, pointerType: string) =>
+                    window.dispatchEvent(
+                        new PointerEvent('pointermove', { clientX: x, clientY: y, pointerType })
+                    )
+                const displacement = (before: number[][], after: number[][]) =>
+                    Math.max(
+                        ...before.map(([x, y], i) =>
+                            Math.hypot(x - 100, y - 100) < 80
+                                ? Math.hypot(after[i][0] - x, after[i][1] - y)
+                                : 0
+                        )
+                    )
+                try {
+                    step()
+                    let frames = 0
+                    for (let i = 0; i < 120; i++) {
+                        if (step(1000 / 120).length) frames++
+                    }
+                    move(1100, 700, 'mouse')
+                    for (let i = 0; i < 80; i++) step()
+                    const beforeTouch = step()
+                    move(100, 100, 'touch')
+                    const touchDisplacement = displacement(beforeTouch, step())
+                    const beforeMouse = step()
+                    move(100, 100, 'mouse')
+                    return {
+                        frames,
+                        touchDisplacement,
+                        mouseDisplacement: displacement(beforeMouse, step())
+                    }
+                } finally {
+                    CanvasRenderingContext2D.prototype.quadraticCurveTo = curve
+                }
+            })
+            expect(result.frames).toBeGreaterThanOrEqual((mobile ? 30 : 60) - 1)
+            expect(result.frames).toBeLessThanOrEqual((mobile ? 30 : 60) + 1)
+            expect(result.touchDisplacement).toBeLessThan(1)
+            if (mobile) expect(result.mouseDisplacement).toBeLessThan(1)
+            else expect(result.mouseDisplacement).toBeGreaterThan(3)
+        })
+    })
+
+test('waves resize, respect reduced motion, and pause in a hidden tab', async ({ page }) => {
+    await page.addInitScript(() => {
+        Reflect.set(window, 'waveDraws', 0)
+        const clear = CanvasRenderingContext2D.prototype.clearRect
+        CanvasRenderingContext2D.prototype.clearRect = function (x, y, width, height) {
+            if (this.canvas.classList.contains('animated-background')) {
+                Reflect.set(window, 'waveDraws', Reflect.get(window, 'waveDraws') + 1)
+            }
+            return clear.call(this, x, y, width, height)
+        }
+    })
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await openPage(page)
+    const canvas = page.locator('canvas.animated-background')
+    await expect(canvas).toHaveAttribute('aria-hidden', 'true')
+    const draws = () => page.evaluate(() => Reflect.get(window, 'waveDraws') as number)
+    await expect.poll(draws).toBeGreaterThan(0)
+    const staticCount = await draws()
+    await page.mouse.move(100, 100)
+    await page.waitForTimeout(150)
+    expect(await draws()).toBe(staticCount)
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect.poll(() => canvas.evaluate((el) => el.width)).toBe(390)
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    const start = await draws()
+    await expect.poll(draws).toBeGreaterThan(start + 2)
+    await page.evaluate(() => {
+        Object.defineProperty(document, 'hidden', { configurable: true, value: true })
+        document.dispatchEvent(new Event('visibilitychange'))
+    })
+    const paused = await draws()
+    await page.waitForTimeout(150)
+    expect(await draws()).toBe(paused)
+    await page.evaluate(() => {
+        Object.defineProperty(document, 'hidden', { configurable: true, value: false })
+        document.dispatchEvent(new Event('visibilitychange'))
+    })
+    await expect.poll(draws).toBeGreaterThan(paused + 2)
+})
+
+test('Russian finite expiry sits under the plan name', async ({ page }) => {
+    await openPage(page, { locale: 'ru', user: { expiresAt: '2100-01-01T00:00:00Z' } })
+    await expect(page.getByText('Действует до 1 января 2100', { exact: true })).toBeVisible()
+    await expect(page.getByText('Активна', { exact: true })).toHaveCount(1)
+    await expect(page.getByRole('button', { name: 'Подробнее', exact: true })).toHaveCount(0)
+})
+
+for (const width of [390, 768, 1280])
+    test(`compact subscription card and connection spacing at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 1000 })
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        await openPage(page)
+        const qr = page.getByRole('button', { name: 'Show QR code', exact: true })
+        const qrBox = await qr.boundingBox()
+        const linkBox = await page
+            .getByRole('textbox', { name: 'Copy subscription link', exact: true })
+            .locator('..')
+            .locator('..')
+            .boundingBox()
+        const card = page.locator('main .mantine-Card-root').last()
+        const cardBox = await card.boundingBox()
+        expect(qrBox!.width).toBeCloseTo(linkBox!.width, 0)
+        expect(cardBox!.y + cardBox!.height - qrBox!.y - qrBox!.height).toBeLessThanOrEqual(33)
+        await expect(card.getByRole('region', { includeHidden: true })).toHaveCount(0)
+        const intro = await page
+            .getByText(
+                'Choose your device. Install an app. Add your subscription. We’ll guide you through it.',
+                { exact: true }
+            )
+            .boundingBox()
+        const connect = await page
+            .getByRole('button', { name: 'Connect a device', exact: true })
+            .boundingBox()
+        const gap = connect!.y - intro!.y - intro!.height
+        expect(gap).toBeGreaterThanOrEqual(28)
+        if (width === 390) expect(gap).toBeLessThanOrEqual(32)
+        if (width >= 768) {
+            expect(connect!.y).toBeCloseTo(qrBox!.y, 0)
+            expect(connect!.height).toBeCloseTo(qrBox!.height, 0)
+            const connectionBox = await page
+                .locator('main .mantine-Card-root')
+                .first()
+                .boundingBox()
+            expect(connectionBox!.y).toBeCloseTo(cardBox!.y, 0)
+            expect(connectionBox!.height).toBeCloseTo(cardBox!.height, 0)
+        }
+        if (width === 1280) {
+            const title = page.getByRole('heading', { name: 'Connect your VPN', exact: true })
+            const size = await title.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+            expect(size).toBeGreaterThanOrEqual(40)
+            expect(size).toBeLessThanOrEqual(48)
+        }
+    })
+
+test('panel icons render on external, import and copy buttons; steps lead the wizard', async ({
+    page
+}) => {
+    const config = makeConfig()
+    const install = config.platforms.android.apps[0].blocks[0]
+    install.buttons.push({
+        ...install.buttons[0],
+        type: 'copyButton',
+        link: 'copy-this',
+        text: { ...install.buttons[0].text, en: 'Panel copy' }
+    })
+    await openPage(page, { config })
+    const dialog = await wizard(page)
+    await dialog.getByRole('button', { name: 'Android', exact: true }).click()
+    for (const button of install.buttons) {
+        const action = dialog.getByRole(button.type === 'copyButton' ? 'button' : 'link', {
+            name: button.text.en,
+            exact: true
+        })
+        await expect(action.locator('svg')).toHaveCount(1)
+    }
+    const steps = await dialog.getByRole('list').boundingBox()
+    const heading = await dialog
+        .getByRole('heading', { name: 'Install the app', exact: true })
+        .boundingBox()
+    const support = await dialog.getByRole('button', { name: 'Support', exact: true }).boundingBox()
+    expect(steps!.y).toBeLessThan(heading!.y)
+    expect(support!.y).toBeGreaterThan(heading!.y)
+    const choose = dialog.getByRole('button', { name: 'Choose another app', exact: true })
+    await choose.click()
+    await expect(choose).toHaveAttribute('aria-expanded', 'true')
+    await expect(page.getByRole('menu', { name: 'Choose another app' })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('menu')).toHaveCount(0)
+    await expect(choose).toBeFocused()
+    await dialog.getByRole('button', { name: 'Continue' }).click()
+    await expect(
+        dialog.getByRole('link', { name: 'Add to incy', exact: true }).locator('svg')
+    ).toHaveCount(1)
+})
+
+for (const width of [390, 1280])
+    test(`device refresh retains modal bounds at ${width}px, including error retries`, async ({
+        page
+    }, info) => {
+        await page.setViewportSize({ width, height: 900 })
+        await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
+        await openPage(page)
+        let pending: Promise<void> | undefined
+        let release = () => {}
+        let status = 200
+        await page.route('**/api/devices', async (route) => {
+            if (pending) await pending
+            await route.fulfill({
+                status,
+                json: {
+                    total: 1,
+                    limit: 5,
+                    devices: [
+                        {
+                            deviceModel: 'Test phone',
+                            platform: 'Android',
+                            osVersion: '16',
+                            createdAt: '2026-01-01T00:00:00Z',
+                            updatedAt: '2026-10-01T00:00:00Z'
+                        }
+                    ]
+                }
+            })
+        })
+        await page.getByRole('button', { name: 'Your devices', exact: true }).click()
+        const dialog = page.getByRole('dialog', { name: 'Your devices', exact: true })
+        await expect(dialog.getByText('Test phone')).toBeVisible()
+        const refresh = dialog.getByRole('button', { name: 'Try again', exact: true })
+        let previousStatus = 200
+        for (const nextStatus of [200, 503, 200]) {
+            await refresh.click({ trial: true })
+            const before = await dialog.boundingBox()
+            pending = new Promise<void>((resolve) => {
+                release = resolve
+            })
+            status = nextStatus
+            await refresh.click()
+            await expect(refresh).toBeDisabled()
+            await expect(dialog.locator('[aria-busy="true"]')).toBeVisible()
+            expect(await dialog.boundingBox()).toEqual(before)
+            await expect(dialog.getByText('Test phone')).toHaveCount(previousStatus === 200 ? 1 : 0)
+            await expect(dialog.getByRole('status')).toHaveCount(0)
+            if (nextStatus === 200 && previousStatus === 200)
+                await page.screenshot({ path: info.outputPath('refresh-pending.png') })
+            release()
+            await expect(refresh).toBeEnabled()
+            await expect(dialog.locator('[aria-busy="false"]')).toBeVisible()
+            if (nextStatus === 503) await expect(dialog.getByText(/We couldn’t load/)).toBeVisible()
+            else {
+                await expect(dialog.getByText('Test phone')).toBeVisible()
+                await expect(dialog.getByText(/We couldn’t load/)).toHaveCount(0)
+            }
+            previousStatus = nextStatus
+        }
+    })
+
+for (const width of [390, 1280])
+    for (const theme of ['light', 'dark'] as const)
+        test(`wizard shared frame at ${width}px in ${theme}`, async ({ page }, info) => {
+            await page.setViewportSize({ width, height: 1000 })
+            await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
+            await openPage(page)
+            const buttonText = await page
+                .getByRole('button', { name: 'Connect a device', exact: true })
+                .evaluate((el) => {
+                    const style = getComputedStyle(el)
+                    return { size: style.fontSize, weight: style.fontWeight }
+                })
+            const dialog = await wizard(page)
+            await dialog.getByRole('button', { name: 'Windows', exact: true }).click()
+            const download = dialog.getByRole('link', {
+                name: makeConfig().platforms.windows.apps[0].blocks[0].buttons[0].text.en,
+                exact: true
+            })
+            const before = await download.boundingBox()
+            const choose = dialog.getByRole('button', { name: 'Choose another app' })
+            const client = dialog.getByRole('heading', { name: 'Koala Clash', exact: true })
+            const badge = dialog.getByText('Recommended', { exact: true })
+            const centerY = async (locator: typeof choose) => {
+                const box = (await locator.boundingBox())!
+                return box.y + box.height / 2
+            }
+            expect(Math.abs((await centerY(client)) - (await centerY(choose)))).toBeLessThan(1)
+            expect(Math.abs((await centerY(badge)) - (await centerY(choose)))).toBeLessThan(1)
+            await expect(dialog.getByText('Windows', { exact: true })).toHaveCount(1)
+            await choose.click()
+            for (const option of await page.getByRole('menuitem').all()) {
+                await expect(option).toHaveCSS('font-size', buttonText.size)
+                await expect(option).toHaveCSS('font-weight', buttonText.weight)
+            }
+            expect(await download.boundingBox()).toEqual(before)
+            await page.keyboard.press('Escape')
+            await expect(choose).toBeFocused()
+            let frame:
+                | {
+                      x: number
+                      y: number
+                      width: number
+                      padding: string
+                      border: string
+                      radius: string
+                      fontSize: string
+                      headingX: number
+                      headingY: number
+                  }
+                | undefined
+            for (const [step, title, next] of [
+                [0, 'Install the app', 'Continue'],
+                [1, 'Add your subscription', 'Continue'],
+                [2, 'Setup complete', 'Return to subscription']
+            ] as const) {
+                const heading = dialog.getByRole('heading', { name: title, exact: true })
+                await expect(heading).toBeVisible()
+                if (step > 0) await expect(heading).toBeFocused()
+                for (const button of await dialog
+                    .locator('button, a')
+                    .filter({ hasText: /\S/ })
+                    .all()) {
+                    await expect(button).toHaveCSS('font-size', buttonText.size)
+                    await expect(button).toHaveCSS('font-weight', buttonText.weight)
+                }
+                const panel = dialog
+                    .locator('section')
+                    .filter({ has: page.getByRole('heading', { name: title, exact: true }) })
+                    .first()
+                const metrics = () =>
+                    panel.evaluate((el) => {
+                        const box = el.getBoundingClientRect()
+                        const style = getComputedStyle(el)
+                        const heading = el.querySelector('h2')!
+                        const title = heading.getBoundingClientRect()
+                        return {
+                            x: box.x,
+                            y: box.y,
+                            width: box.width,
+                            padding: style.padding,
+                            border: style.border,
+                            radius: style.borderRadius,
+                            fontSize: getComputedStyle(heading).fontSize,
+                            headingX: title.x,
+                            headingY: title.y
+                        }
+                    })
+                if (frame) await expect.poll(metrics).toEqual(frame)
+                else frame = await metrics()
+                const header = dialog.locator('header')
+                const headerBounds = (await header.boundingBox())!
+                const modalTitle = header.getByRole('heading', { name: 'Connection setup' })
+                const titleBounds = (await modalTitle.boundingBox())!
+                const close = header.getByRole('button', { name: 'Close', exact: true })
+                const closeBounds = (await close.boundingBox())!
+                const stepsBounds = (await dialog.getByRole('list').boundingBox())!
+                expect(titleBounds.x).toBe(frame.x)
+                expect(stepsBounds.x).toBe(frame.x)
+                expect(closeBounds.x + closeBounds.width).toBe(frame.x + frame.width)
+                expect(closeBounds.width).toBe(40)
+                expect(closeBounds.height).toBe(40)
+                await expect(close.locator('svg')).toHaveCSS('width', '20px')
+                await expect(close.locator('svg')).toHaveCSS('height', '20px')
+                await expect(modalTitle).toHaveCSS('font-size', '16px')
+                await expect(modalTitle).toHaveCSS('font-weight', '500')
+                await expect(header).toHaveCSS('border-bottom-width', '0px')
+                const headerGap = stepsBounds.y - headerBounds.y - headerBounds.height
+                expect(headerGap).toBeGreaterThanOrEqual(24)
+                expect(headerGap).toBeLessThanOrEqual(32)
+                const panelGap = frame.y - stepsBounds.y - stepsBounds.height
+                expect(panelGap).toBeGreaterThanOrEqual(28)
+                expect(panelGap).toBeLessThanOrEqual(32)
+                await expect(
+                    dialog.getByRole('button', { name: 'Support', exact: true })
+                ).toHaveCount(1)
+                const back = dialog.getByRole('button', { name: 'Back', exact: true })
+                await expect(back).toBeVisible()
+                if (step === 0) await expect(back).toBeDisabled()
+                else await expect(back).toBeEnabled()
+                const navigation = dialog.getByRole('navigation')
+                const nextButton = navigation.getByRole('button', { name: next, exact: true })
+                await expect(nextButton).toHaveAttribute('data-variant', 'default')
+                const footer = dialog.locator('footer')
+                const footerBounds = (await footer.boundingBox())!
+                expect(footerBounds.y + footerBounds.height).toBeGreaterThanOrEqual(1000)
+                const initialNext = (await nextButton.boundingBox())!
+                expect(footerBounds.y).toBeGreaterThan(initialNext.y + initialNext.height)
+                if (step === 0)
+                    await page.screenshot({
+                        path: info.outputPath('step-0-top.png'),
+                        fullPage: true
+                    })
+                await nextButton.evaluate((el) => el.scrollIntoView({ block: 'center' }))
+                await footer.scrollIntoViewIfNeeded()
+                const scrolledFooter = (await footer.boundingBox())!
+                expect(scrolledFooter.y + scrolledFooter.height).toBeCloseTo(1000, 0)
+                const nextBounds = (await nextButton.boundingBox())!
+                expect(nextBounds.y + nextBounds.height).toBeLessThanOrEqual(scrolledFooter.y)
+                if (step === 1)
+                    await expect(
+                        dialog.getByText('Windows · Koala Clash', { exact: true })
+                    ).toBeVisible()
+                expect(
+                    await panel.evaluate(
+                        (el) => getComputedStyle(el.firstElementChild!).animationName
+                    )
+                ).toBe('none')
+                expect(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true)
+                await page.mouse.move(0, 0)
+                await page.screenshot({ path: info.outputPath(`step-${step}.png`), fullPage: true })
+                await nextButton.click()
+            }
+            await expect(
+                page.getByRole('button', { name: 'Connect a device', exact: true })
+            ).toBeFocused()
+            const reopened = await wizard(page)
+            await reopened.getByRole('button', { name: 'Close', exact: true }).click()
+            await expect(reopened).not.toBeVisible()
+            await expect(
+                page.getByRole('button', { name: 'Connect a device', exact: true })
+            ).toBeFocused()
+        })
+
+test('import has no manual fallback disclosure', async ({ page }) => {
+    await openPage(page)
+    const dialog = await wizard(page)
+    await dialog.getByRole('button', { name: 'Continue', exact: true }).click()
+    await expect(dialog.locator('details')).toHaveCount(0)
+    await expect(dialog.getByRole('textbox', { name: 'Copy subscription link', exact: true })).toHaveCount(0)
 })

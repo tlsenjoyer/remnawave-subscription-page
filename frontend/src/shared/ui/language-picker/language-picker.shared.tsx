@@ -1,5 +1,5 @@
-import { getLanguageInfo, TSubscriptionPageLanguageCode } from '@remnawave/subscription-page-types'
 import { ActionIcon, Menu, Text, useDirection } from '@mantine/core'
+import { getLanguageInfo, TSubscriptionPageLanguageCode } from '@remnawave/subscription-page-types'
 import { IconLanguage } from '@tabler/icons-react'
 import { useEffect } from 'react'
 
@@ -55,17 +55,15 @@ export function LanguagePicker(props: IProps) {
                     aria-label="Change language"
                     color="gray"
                     radius="md"
-                    size="xl"
-                    style={{
-                        background: 'rgba(255, 255, 255, 0.02)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
-                    }}
+                    size="lg"
                     variant="default"
                 >
-                    <IconLanguage size={22} />
+                    <IconLanguage size={18} />
                 </ActionIcon>
             </Menu.Target>
-            <Menu.Dropdown mah={250} style={{ overflowY: 'auto' }}>{items}</Menu.Dropdown>
+            <Menu.Dropdown mah={250} style={{ overflowY: 'auto' }}>
+                {items}
+            </Menu.Dropdown>
         </Menu>
     )
 }

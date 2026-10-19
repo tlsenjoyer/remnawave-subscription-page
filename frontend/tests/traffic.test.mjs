@@ -82,8 +82,21 @@ test('dashboard translations cover every supported locale and fall back to Engli
         assert.ok(
             Object.values(copy).every((value) => typeof value === 'string' && value.length > 0)
         )
+        assert.ok(copy.successText.includes('{app}'), `${locale}.successText`)
         if (locale !== 'en') {
-            for (const key of ['connect', 'deviceError', 'deviceHint', 'privateLink', 'preparing'])
+            for (const key of [
+                'connect',
+                'deviceError',
+                'deviceHint',
+                'privateLink',
+                'preparing',
+                'installTitle',
+                'change',
+                'returnToSubscription',
+                'manualFallback',
+                'success',
+                'successText'
+            ])
                 assert.notEqual(copy[key], english[key], `${locale}.${key}`)
         }
     }

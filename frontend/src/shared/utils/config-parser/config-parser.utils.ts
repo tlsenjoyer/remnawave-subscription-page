@@ -57,5 +57,5 @@ export const formatDate = (
             minute: undefined
         }).format(new Date(dateStr))
     }
-    return dayjs(dateStr).locale(currentLang).format('DD MMMM, YYYY')
+    return dayjs(dateStr).locale(currentLang).format('D MMMM YYYY')
 }

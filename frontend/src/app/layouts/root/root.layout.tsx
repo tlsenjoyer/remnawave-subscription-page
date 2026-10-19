@@ -1,19 +1,21 @@
+import { GetSubscriptionInfoByShortUuidCommand } from '@remnawave/backend-contract'
 import {
     APP_CONFIG_ROUTE_LEADING_PATH,
     SubscriptionPageRawConfigSchema
 } from '@remnawave/subscription-page-types'
-import { GetSubscriptionInfoByShortUuidCommand } from '@remnawave/backend-contract'
-import { Outlet } from 'react-router'
-import { useLayoutEffect } from 'react'
 import consola from 'consola/browser'
 import { ofetch } from 'ofetch'
+import { useLayoutEffect } from 'react'
+import { Outlet } from 'react-router'
 
+import { LoadingScreen } from '@shared/ui'
+import { InteractiveWaves } from '@shared/ui/interactive-waves/interactive-waves'
+
+import { useAppConfigStoreActions, useIsConfigLoaded } from '@entities/app-config-store'
 import {
     useSubscriptionInfoStoreActions,
     useSubscriptionInfoStoreInfo
 } from '@entities/subscription-info-store'
-import { useAppConfigStoreActions, useIsConfigLoaded } from '@entities/app-config-store'
-import { LoadingScreen } from '@shared/ui'
 
 import classes from './root.module.css'
 
@@ -76,7 +78,7 @@ export function RootLayout() {
     if (!isConfigLoaded || !subscription) {
         return (
             <div className={classes.root}>
-                <div className="animated-background"></div>
+                <InteractiveWaves />
                 <div className={classes.content}>
                     <main className={classes.main}>
                         <LoadingScreen height="100vh" />
@@ -88,11 +90,11 @@ export function RootLayout() {
 
     return (
         <div className={classes.root}>
-            <div className="animated-background"></div>
+            <InteractiveWaves />
             <div className={classes.content}>
-                <main className={classes.main}>
+                <div className={classes.main}>
                     <Outlet />
-                </main>
+                </div>
             </div>
         </div>
     )
