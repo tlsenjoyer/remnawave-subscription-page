@@ -1,17 +1,10 @@
 services:
   remnawave-subscription-page:
-    image: ghcr.io/tlsenjoyer/remnawave-subscription-page:v2.2.2
-    container_name: remnawave-subscription-page
+    image: ghcr.io/tlsenjoyer/remnawave-subscription-page:latest
+    container_name: remnawave-custom-subscription-page
     hostname: remnawave-subscription-page
     restart: always
     env_file:
       - .env
     ports:
-      - '127.0.0.1:3010:3010'
-    networks:
-      - remnawave-network
-
-networks:
-  remnawave-network:
-    driver: bridge
-    external: true
+      - '127.0.0.1:3011:3010'
