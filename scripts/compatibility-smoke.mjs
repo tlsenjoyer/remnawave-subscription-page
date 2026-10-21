@@ -10,7 +10,7 @@ const require = createRequire(new URL('../frontend/package.json', import.meta.ur
 const {
     GetMetadataCommand, GetSubpageConfigsCommand, GetSubpageConfigCommand,
     GetSubscriptionInfoByShortUuidCommand, GetSubpageConfigByShortUuidCommand,
-    REQUEST_TEMPLATE_TYPE_VALUES, REMNAWAVE_REAL_IP_HEADER, GetUserByUsernameCommand, GetUserHwidDevicesCommand
+    REQUEST_TEMPLATE_TYPE_VALUES, REMNAWAVE_REAL_IP_HEADER, GetUserByUsernameCommand, GetUserHwidDevicesCommand, DeleteUserHwidDeviceCommand
 } = require('@remnawave/backend-contract')
 const { APP_CONFIG_ROUTE_LEADING_PATH } = require('@remnawave/subscription-page-types')
 const root = fileURLToPath(new URL('../', import.meta.url))
@@ -44,6 +44,7 @@ requests.set(pathOf(GetSubpageConfigByShortUuidCommand.url('other')), { response
 requests.set(pathOf(GetUserHwidDevicesCommand.url('1')), deviceData(1))
 requests.set(pathOf(GetUserHwidDevicesCommand.url('2')), deviceData(2))
 let rejectDevices = false
+let rejectDeviceDeletion = false
 GetMetadataCommand.ResponseSchema.parse(requests.get(pathOf(GetMetadataCommand.url)))
 GetSubpageConfigsCommand.ResponseSchema.parse(requests.get(pathOf(GetSubpageConfigsCommand.url)))
 
@@ -52,7 +53,16 @@ const panel = createServer(async (req, res) => {
     for await (const part of req) parts.push(part)
     forwarded.push({ path: req.url, headers: req.headers, body: Buffer.concat(parts).toString() })
     if (rejectDevices && req.url.startsWith('/api/hwid/')) { res.writeHead(403); res.end(); return }
-    if (subscriptionPaths.has(req.url)) {
+    if (req.method === 'POST' && req.url === DeleteUserHwidDeviceCommand.url) {
+        if (rejectDeviceDeletion) { res.writeHead(403); res.end(); return }
+        const body = DeleteUserHwidDeviceCommand.RequestBodySchema.parse(JSON.parse(Buffer.concat(parts).toString()))
+        assert.equal(body.userId, 1)
+        assert.equal(body.hwid, 'never-expose-hardware-id')
+        const data = { response: { total: 0, devices: [] } }
+        requests.set(pathOf(GetUserHwidDevicesCommand.url('1')), data)
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify(data))
+    } else if (subscriptionPaths.has(req.url)) {
         res.writeHead(200, { 'content-type': 'text/plain', 'subscription-userinfo': 'upload=0; download=100; total=1000; expire=2000000000', 'profile-update-interval': '12' })
         res.end(payload)
     } else if (requests.has(req.url)) {
@@ -114,6 +124,20 @@ try {
     assert.equal(firstData.limit, 5)
     assert.equal(firstData.devices[0].deviceModel, 'Phone 1', 'browser user ID ignored')
     for (const hidden of ['hwid','userId','requestIp','userAgent']) assert.equal(firstData.devices[0][hidden], undefined)
+    const removeDevice = (cookie, body, subject = 'demo') => fetch(`${address}${publicRoot}/api/devices`, {
+        method: 'DELETE', headers: { ...proxyHeaders, cookie, 'x-subscription-id': subject, 'content-type': 'application/json' }, body: JSON.stringify(body)
+    })
+    assert.match(firstData.devices[0].id, /^[a-f0-9]{64}$/)
+    assert.equal((await removeDevice('', { id: firstData.devices[0].id })).status, 401)
+    assert.equal((await removeDevice(deviceSession, { id: firstData.devices[0].id, userId: 2 })).status, 400)
+    assert.equal((await removeDevice(deviceSession, { id: '0'.repeat(64) })).status, 404)
+    rejectDeviceDeletion = true
+    assert.equal((await removeDevice(deviceSession, { id: firstData.devices[0].id })).status, 503)
+    rejectDeviceDeletion = false
+    const removed = await removeDevice(deviceSession, { id: firstData.devices[0].id })
+    assert.equal(removed.status, 200)
+    assert.deepEqual(await removed.json(), { total: 0, limit: 5, devices: [] })
+    requests.set(pathOf(GetUserHwidDevicesCommand.url('1')), deviceData(1))
     const secondPage = await fetch(`${address}${publicRoot}/other`, { headers: proxyHeaders })
     const secondCookie = secondPage.headers.getSetCookie().find(value => value.startsWith('device_session=')).split(';')[0]
     const secondData = await (await deviceRequest(secondCookie, '', 'other')).json()

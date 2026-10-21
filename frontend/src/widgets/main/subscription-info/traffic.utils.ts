@@ -41,9 +41,11 @@ export function formatTrafficBytes(bytes: bigint | null, locale: string): string
         unit++
     }
     const value = Number((bytes * 100n) / divisor) / 100
-    return `${new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value)}\u00a0${units[unit]}`
+    return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value)}\u00a0${units[unit]}`
 }
 
-export function formatExactBytes(bytes: bigint | null, locale: string): string {
-    return bytes === null ? '—' : new Intl.NumberFormat(locale).format(bytes)
+export function formatTrafficMegabytes(bytes: bigint | null, locale: string): string {
+    return bytes === null
+        ? '—'
+        : new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(Number(bytes) / 1024 ** 2)
 }

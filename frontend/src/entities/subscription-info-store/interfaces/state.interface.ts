@@ -4,6 +4,7 @@ export interface IState {
     subscription:
         | (GetSubscriptionInfoByShortUuidCommand.Response['response'] & {
               planName?: string
+              subscriptionCreatedAt?: string
           })
         | null
 }

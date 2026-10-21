@@ -1,8 +1,15 @@
 import { Request, Response } from 'express';
+import { createHash } from 'node:crypto';
+import { z } from 'zod';
 
 import {
     Controller,
+    BadRequestException,
+    Body,
+    Delete,
     Get,
+    HttpException,
+    HttpStatus,
     Req,
     Res,
     UnauthorizedException,
@@ -10,10 +17,16 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { GetUserHwidDevicesCommand, GetUserByUsernameCommand } from '@remnawave/backend-contract';
+import {
+    DeleteUserHwidDeviceCommand,
+    GetUserHwidDevicesCommand,
+    GetUserByUsernameCommand,
+} from '@remnawave/backend-contract';
 
 import { AxiosService } from '@common/axios';
 import { ClientIp } from '@common/decorators/get-ip';
+
+const deviceId = (hwid: string) => createHash('sha256').update(hwid).digest('hex');
 
 @Controller('api/devices')
 export class DevicesController {
@@ -28,6 +41,27 @@ export class DevicesController {
         @Res({ passthrough: true }) response: Response,
         @ClientIp() ip: string,
     ) {
+        return this.devices(request, response, ip);
+    }
+
+    @Delete()
+    async remove(
+        @Req() request: Request,
+        @Res({ passthrough: true }) response: Response,
+        @ClientIp() ip: string,
+        @Body() body: unknown,
+    ) {
+        const parsed = z
+            .object({ id: z.string().regex(/^[a-f0-9]{64}$/) })
+            .strict()
+            .safeParse(body);
+        if (!parsed.success) {
+            throw new BadRequestException('A device identifier is required.');
+        }
+        return this.devices(request, response, ip, parsed.data.id);
+    }
+
+    private async devices(request: Request, response: Response, ip: string, id?: string) {
         response.setHeader('Cache-Control', 'no-store');
         let shortUuid: string;
         try {
@@ -59,14 +93,30 @@ export class DevicesController {
             const result = await this.panel.axiosInstance.get(
                 GetUserHwidDevicesCommand.url(String(user.id)),
             );
-            const data = GetUserHwidDevicesCommand.ResponseSchema.parse(result.data).response;
+            let data = GetUserHwidDevicesCommand.ResponseSchema.parse(result.data).response;
             if (data.devices.some((device) => device.userId !== user.id)) {
                 throw new Error('Device owner mismatch');
+            }
+            if (id !== undefined) {
+                const device = data.devices.find((device) => deviceId(device.hwid) === id);
+                if (!device) {
+                    // The global NotFoundException filter closes sockets for unknown routes.
+                    throw new HttpException('Device not found.', HttpStatus.NOT_FOUND);
+                }
+                const deleted = await this.panel.axiosInstance.post(
+                    DeleteUserHwidDeviceCommand.url,
+                    { userId: user.id, hwid: device.hwid },
+                );
+                data = DeleteUserHwidDeviceCommand.ResponseSchema.parse(deleted.data).response;
+                if (data.devices.some((device) => device.userId !== user.id)) {
+                    throw new Error('Device owner mismatch');
+                }
             }
             return {
                 total: data.total,
                 limit: user.hwidDeviceLimit,
                 devices: data.devices.map((device) => ({
+                    id: deviceId(device.hwid),
                     platform: device.platform,
                     osVersion: device.osVersion,
                     deviceModel: device.deviceModel,
@@ -74,9 +124,10 @@ export class DevicesController {
                     updatedAt: device.updatedAt,
                 })),
             };
-        } catch {
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
             throw new ServiceUnavailableException(
-                'Device list unavailable. Please retry or contact support.',
+                'Device request unavailable. Please retry or contact support.',
             );
         }
     }

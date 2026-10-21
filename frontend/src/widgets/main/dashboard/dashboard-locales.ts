@@ -1,5 +1,8 @@
 export default {
   "fr": {
+    "deletingDevice": "Suppression...",
+    "deleteDevice": "Supprimer",
+    "deleteDeviceError": "Impossible de supprimer cet appareil. Réessayez ou contactez l’assistance.",
     "copyShort": "Copier",
     "appearance": "Apparence sombre",
     "connect": "Connecter un nouvel appareil",
@@ -58,6 +61,9 @@ export default {
     "manualFallback": "L’application ne s’est pas ouverte ?"
   },
   "de": {
+    "deletingDevice": "Wird gelöscht...",
+    "deleteDevice": "Löschen",
+    "deleteDeviceError": "Dieses Gerät konnte nicht gelöscht werden. Versuchen Sie es erneut oder kontaktieren Sie den Support.",
     "copyShort": "Kopieren",
     "appearance": "Dunkle Darstellung",
     "connect": "Neues Gerät verbinden",
@@ -116,6 +122,9 @@ export default {
     "manualFallback": "Die App wurde nicht geöffnet?"
   },
   "es": {
+    "deletingDevice": "Eliminando...",
+    "deleteDevice": "Eliminar",
+    "deleteDeviceError": "No se pudo eliminar este dispositivo. Inténtalo de nuevo o contacta con soporte.",
     "copyShort": "Copiar",
     "appearance": "Apariencia oscura",
     "connect": "Conectar un dispositivo nuevo",
@@ -174,6 +183,9 @@ export default {
     "manualFallback": "¿No se abrió la aplicación?"
   },
   "pt": {
+    "deletingDevice": "Excluindo...",
+    "deleteDevice": "Excluir",
+    "deleteDeviceError": "Não foi possível excluir este dispositivo. Tente novamente ou contate o suporte.",
     "copyShort": "Copiar",
     "appearance": "Aparência escura",
     "connect": "Conectar novo dispositivo",
@@ -232,6 +244,9 @@ export default {
     "manualFallback": "A aplicação não abriu?"
   },
   "pl": {
+    "deletingDevice": "Usuwanie...",
+    "deleteDevice": "Usuń",
+    "deleteDeviceError": "Nie udało się usunąć urządzenia. Spróbuj ponownie lub skontaktuj się z pomocą.",
     "copyShort": "Kopiuj",
     "appearance": "Ciemny motyw",
     "connect": "Połącz nowe urządzenie",
@@ -290,6 +305,9 @@ export default {
     "manualFallback": "Aplikacja się nie otworzyła?"
   },
   "tr": {
+    "deletingDevice": "Siliniyor...",
+    "deleteDevice": "Sil",
+    "deleteDeviceError": "Bu cihaz silinemedi. Tekrar deneyin veya destek ile iletişime geçin.",
     "copyShort": "Kopyala",
     "appearance": "Koyu görünüm",
     "connect": "Yeni cihaz bağla",
@@ -348,6 +366,9 @@ export default {
     "manualFallback": "Uygulama açılmadı mı?"
   },
   "zh": {
+    "deletingDevice": "正在删除...",
+    "deleteDevice": "删除",
+    "deleteDeviceError": "无法删除此设备。请重试或联系支持。",
     "copyShort": "复制",
     "appearance": "深色外观",
     "connect": "连接新设备",
@@ -406,6 +427,9 @@ export default {
     "manualFallback": "应用没有打开？"
   },
   "ja": {
+    "deletingDevice": "削除中...",
+    "deleteDevice": "削除",
+    "deleteDeviceError": "このデバイスを削除できませんでした。再試行するか、サポートにお問い合わせください。",
     "copyShort": "コピー",
     "appearance": "ダークモード",
     "connect": "新しいデバイスを接続",
@@ -464,6 +488,9 @@ export default {
     "manualFallback": "アプリが開きませんか？"
   },
   "fa": {
+    "deletingDevice": "در حال حذف...",
+    "deleteDevice": "حذف",
+    "deleteDeviceError": "حذف این دستگاه ممکن نشد. دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.",
     "copyShort": "کپی",
     "appearance": "نمای تیره",
     "connect": "اتصال دستگاه جدید",
@@ -522,6 +549,9 @@ export default {
     "manualFallback": "برنامه باز نشد؟"
   },
   "hi": {
+    "deletingDevice": "हटाया जा रहा है...",
+    "deleteDevice": "हटाएँ",
+    "deleteDeviceError": "यह डिवाइस हटाया नहीं जा सका। फिर कोशिश करें या सहायता से संपर्क करें।",
     "copyShort": "कॉपी करें",
     "appearance": "डार्क थीम",
     "connect": "नया डिवाइस जोड़ें",
@@ -580,6 +610,9 @@ export default {
     "manualFallback": "ऐप नहीं खुला?"
   },
   "vi": {
+    "deletingDevice": "Đang xóa...",
+    "deleteDevice": "Xóa",
+    "deleteDeviceError": "Không thể xóa thiết bị này. Hãy thử lại hoặc liên hệ hỗ trợ.",
     "copyShort": "Sao chép",
     "appearance": "Giao diện tối",
     "connect": "Kết nối thiết bị mới",
@@ -638,6 +671,9 @@ export default {
     "manualFallback": "Ứng dụng không mở?"
   },
   "th": {
+    "deletingDevice": "กำลังลบ...",
+    "deleteDevice": "ลบ",
+    "deleteDeviceError": "ไม่สามารถลบอุปกรณ์นี้ได้ โปรดลองอีกครั้งหรือติดต่อฝ่ายสนับสนุน",
     "copyShort": "คัดลอก",
     "appearance": "ธีมมืด",
     "connect": "เชื่อมต่ออุปกรณ์ใหม่",
@@ -696,6 +732,9 @@ export default {
     "manualFallback": "แอปไม่เปิดใช่ไหม?"
   },
   "uk": {
+    "deletingDevice": "Видалення...",
+    "deleteDevice": "Видалити",
+    "deleteDeviceError": "Не вдалося видалити пристрій. Спробуйте ще раз або зверніться до підтримки.",
     "copyShort": "Копіювати",
     "appearance": "Темна тема",
     "connect": "Підключити новий пристрій",
@@ -754,6 +793,9 @@ export default {
     "manualFallback": "Застосунок не відкрився?"
   },
   "be": {
+    "deletingDevice": "Выдаленне...",
+    "deleteDevice": "Выдаліць",
+    "deleteDeviceError": "Не ўдалося выдаліць прыладу. Паўтарыце спробу або звярніцеся ў падтрымку.",
     "copyShort": "Капіяваць",
     "appearance": "Цёмная тэма",
     "connect": "Падключыць новую прыладу",
@@ -812,6 +854,9 @@ export default {
     "manualFallback": "Праграма не адкрылася?"
   },
   "id": {
+    "deletingDevice": "Menghapus...",
+    "deleteDevice": "Hapus",
+    "deleteDeviceError": "Perangkat ini tidak dapat dihapus. Coba lagi atau hubungi dukungan.",
     "copyShort": "Salin",
     "appearance": "Tampilan gelap",
     "connect": "Hubungkan perangkat baru",
@@ -870,6 +915,9 @@ export default {
     "manualFallback": "Aplikasi tidak terbuka?"
   },
   "uz": {
+    "deletingDevice": "O‘chirilmoqda...",
+    "deleteDevice": "O‘chirish",
+    "deleteDeviceError": "Qurilmani o‘chirib bo‘lmadi. Qayta urinib ko‘ring yoki yordam xizmatiga murojaat qiling.",
     "copyShort": "Nusxalash",
     "appearance": "Tungi mavzu",
     "connect": "Yangi qurilmani ulash",
@@ -928,6 +976,9 @@ export default {
     "manualFallback": "Ilova ochilmadimi?"
   },
   "az": {
+    "deletingDevice": "Silinir...",
+    "deleteDevice": "Sil",
+    "deleteDeviceError": "Bu cihazı silmək mümkün olmadı. Yenidən cəhd edin və ya dəstəyə müraciət edin.",
     "copyShort": "Kopyala",
     "appearance": "Qaranlıq görünüş",
     "connect": "Yeni cihaz qoş",
@@ -986,6 +1037,9 @@ export default {
     "manualFallback": "Tətbiq açılmadı?"
   },
   "tk": {
+    "deletingDevice": "Pozulýar...",
+    "deleteDevice": "Poz",
+    "deleteDeviceError": "Bu enjamy pozup bolmady. Gaýtadan synanyşyň ýa-da goldaw bilen habarlaşyň.",
     "copyShort": "Göçürmek",
     "appearance": "Garaňky tema",
     "connect": "Täze enjam birikdiriň",

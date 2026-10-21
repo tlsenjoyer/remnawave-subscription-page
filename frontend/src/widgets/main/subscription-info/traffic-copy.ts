@@ -8,7 +8,7 @@ const en = {
     noReset: 'No automatic reset',
     limited: 'Limited',
     disabled: 'Disabled',
-    exact: 'Exact usage (bytes)',
+    exact: 'Exact usage (MB)',
     exhausted: 'Traffic limit reached'
 }
 type Copy = typeof en
@@ -24,7 +24,7 @@ const copy: Record<string, Copy> = {
         noReset: 'Без автоматического сброса',
         limited: 'Ограничена',
         disabled: 'Отключена',
-        exact: 'Точный расход (байты)',
+        exact: 'Точный расход (МБ)',
         exhausted: 'Лимит трафика исчерпан'
     },
     fa: {
@@ -37,7 +37,7 @@ const copy: Record<string, Copy> = {
         noReset: 'بدون بازنشانی خودکار',
         limited: 'محدود شده',
         disabled: 'غیرفعال',
-        exact: 'مصرف دقیق (بایت)',
+        exact: 'مصرف دقیق (MB)',
         exhausted: 'سقف ترافیک مصرف شده است'
     },
     zh: {
@@ -50,7 +50,7 @@ const copy: Record<string, Copy> = {
         noReset: '不自动重置',
         limited: '已限制',
         disabled: '已禁用',
-        exact: '精确用量（字节）',
+        exact: '精确用量（MB）',
         exhausted: '流量已用尽'
     },
     fr: {
@@ -63,7 +63,7 @@ const copy: Record<string, Copy> = {
         noReset: 'Sans réinitialisation automatique',
         limited: 'Limité',
         disabled: 'Désactivé',
-        exact: 'Utilisation exacte (octets)',
+        exact: 'Utilisation exacte (Mo)',
         exhausted: 'Limite de trafic atteinte'
     }
 }
@@ -79,7 +79,7 @@ const extra: Record<string, string[]> = {
         'Автоматик янгиланмайди',
         'Чекланган',
         'Ўчирилган',
-        'Аниқ сарф (байт)',
+        'Аниқ сарф (МБ)',
         'Трафик лимити тугаган'
     ],
     de: [
@@ -92,7 +92,7 @@ const extra: Record<string, string[]> = {
         'Keine automatische Zurücksetzung',
         'Begrenzt',
         'Deaktiviert',
-        'Exakte Nutzung (Bytes)',
+        'Exakte Nutzung (MB)',
         'Datenlimit erreicht'
     ],
     hi: [
@@ -105,7 +105,7 @@ const extra: Record<string, string[]> = {
         'स्वचालित रीसेट नहीं',
         'सीमित',
         'अक्षम',
-        'सटीक उपयोग (बाइट)',
+        'सटीक उपयोग (MB)',
         'ट्रैफ़िक सीमा पूरी हुई'
     ],
     tr: [
@@ -118,7 +118,7 @@ const extra: Record<string, string[]> = {
         'Otomatik sıfırlanmaz',
         'Sınırlı',
         'Devre dışı',
-        'Tam kullanım (bayt)',
+        'Tam kullanım (MB)',
         'Trafik sınırına ulaşıldı'
     ],
     az: [
@@ -131,7 +131,7 @@ const extra: Record<string, string[]> = {
         'Avtomatik sıfırlanmır',
         'Məhdudlaşdırılıb',
         'Deaktivdir',
-        'Dəqiq istifadə (bayt)',
+        'Dəqiq istifadə (MB)',
         'Trafik limiti bitib'
     ],
     es: [
@@ -144,7 +144,7 @@ const extra: Record<string, string[]> = {
         'Sin restablecimiento automático',
         'Limitada',
         'Desactivada',
-        'Uso exacto (bytes)',
+        'Uso exacto (MB)',
         'Límite de tráfico alcanzado'
     ],
     vi: [
@@ -157,7 +157,7 @@ const extra: Record<string, string[]> = {
         'Không tự động đặt lại',
         'Bị giới hạn',
         'Đã tắt',
-        'Mức sử dụng chính xác (byte)',
+        'Mức sử dụng chính xác (MB)',
         'Đã hết lưu lượng'
     ],
     ja: [
@@ -170,7 +170,7 @@ const extra: Record<string, string[]> = {
         '自動リセットなし',
         '制限中',
         '無効',
-        '正確な使用量（バイト）',
+        '正確な使用量（MB）',
         '通信量の上限に達しました'
     ],
     be: [
@@ -183,7 +183,7 @@ const extra: Record<string, string[]> = {
         'Без аўтаматычнага скіду',
         'Абмежавана',
         'Адключана',
-        'Дакладны расход (байты)',
+        'Дакладны расход (МБ)',
         'Ліміт трафіку вычарпаны'
     ],
     uk: [
@@ -196,7 +196,7 @@ const extra: Record<string, string[]> = {
         'Без автоматичного скидання',
         'Обмежена',
         'Вимкнена',
-        'Точне використання (байти)',
+        'Точне використання (МБ)',
         'Ліміт трафіку вичерпано'
     ],
     pt: [
@@ -209,7 +209,7 @@ const extra: Record<string, string[]> = {
         'Sem reinício automático',
         'Limitada',
         'Desativada',
-        'Uso exato (bytes)',
+        'Uso exato (MB)',
         'Limite de tráfego atingido'
     ],
     pl: [
@@ -222,7 +222,7 @@ const extra: Record<string, string[]> = {
         'Bez automatycznego resetu',
         'Ograniczona',
         'Wyłączona',
-        'Dokładne użycie (bajty)',
+        'Dokładne użycie (MB)',
         'Limit transferu wykorzystany'
     ],
     id: [
@@ -235,7 +235,7 @@ const extra: Record<string, string[]> = {
         'Tanpa reset otomatis',
         'Dibatasi',
         'Dinonaktifkan',
-        'Penggunaan tepat (byte)',
+        'Penggunaan tepat (MB)',
         'Batas trafik tercapai'
     ],
     tk: [
@@ -248,7 +248,7 @@ const extra: Record<string, string[]> = {
         'Awtomatiki täzelenme ýok',
         'Çäklendirilen',
         'Öçürilen',
-        'Takyk ulanyş (baýt)',
+        'Takyk ulanyş (MB)',
         'Trafik çägine ýetildi'
     ],
     th: [
@@ -261,7 +261,7 @@ const extra: Record<string, string[]> = {
         'ไม่รีเซ็ตอัตโนมัติ',
         'ถูกจำกัด',
         'ปิดใช้งาน',
-        'ปริมาณการใช้งานที่แน่นอน (ไบต์)',
+        'ปริมาณการใช้งานที่แน่นอน (MB)',
         'ใช้ข้อมูลครบตามขีดจำกัดแล้ว'
     ]
 }
@@ -270,7 +270,7 @@ for (const [locale, values] of Object.entries(extra)) {
     copy[locale] = Object.fromEntries(keys.map((key, i) => [key, values[i]])) as Copy
 }
 export const getTrafficCopy = (locale: string): Copy => copy[locale] ?? en
-export function getResetCaption(strategy: string, locale: string): string {
+export function getResetCaption(strategy: string, locale: string, createdAt?: string): string {
     const labels = getTrafficCopy(locale)
     switch (strategy) {
         case 'DAY':
@@ -278,8 +278,14 @@ export function getResetCaption(strategy: string, locale: string): string {
         case 'WEEK':
             return labels.weekly
         case 'MONTH':
-        case 'MONTH_ROLLING':
+        case 'MONTH_ROLLING': {
+            const day = createdAt ? new Date(createdAt).getUTCDate() : NaN
+            if (Number.isFinite(day)) {
+                if (locale === 'ru') return `Сброс ${day} числа ежемесячно`
+                if (locale === 'en') return `Resets on day ${day} of every month`
+            }
             return labels.monthly
+        }
         default:
             return labels.noReset
     }

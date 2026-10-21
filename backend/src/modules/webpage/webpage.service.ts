@@ -8,6 +8,7 @@ import { exit } from 'node:process';
 import { Injectable, NotFoundException, OnApplicationBootstrap } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { GetUserByUsernameCommand } from '@remnawave/backend-contract';
 
 import {
     SubscriptionPageRawConfigSchema,
@@ -216,6 +217,21 @@ export class WebpageService implements OnApplicationBootstrap {
             const baseSettings = this.getBaseSettings(subpageConfig.subpageConfigUuid);
 
             const subscriptionData = subscriptionDataResponse.response;
+            let subscriptionCreatedAt: string | undefined;
+            if (
+                ['MONTH', 'MONTH_ROLLING'].includes(subscriptionData.response.user.trafficLimitStrategy)
+            ) {
+                const owner = await this.axiosService.getUserByUsername(
+                    clientIp,
+                    subscriptionData.response.user.username,
+                );
+                const parsed = GetUserByUsernameCommand.ResponseSchema.shape.response
+                    .pick({ shortUuid: true, createdAt: true })
+                    .safeParse(owner.response?.response);
+                if (owner.isOk && parsed.success && parsed.data.shortUuid === shortUuid) {
+                    subscriptionCreatedAt = parsed.data.createdAt.toISOString();
+                }
+            }
 
             if (!baseSettings.showConnectionKeys) {
                 subscriptionData.response.links = [];
@@ -249,7 +265,12 @@ export class WebpageService implements OnApplicationBootstrap {
                 this.indexTemplate({
                     metaTitle: baseSettings.metaTitle,
                     metaDescription: baseSettings.metaDescription,
-                    panelData: Buffer.from(JSON.stringify(subscriptionData)).toString('base64'),
+                    panelData: Buffer.from(
+                        JSON.stringify({
+                            ...subscriptionData,
+                            response: { ...subscriptionData.response, subscriptionCreatedAt },
+                        }),
+                    ).toString('base64'),
                     supportEmail: this.configService.getOrThrow('SUPPORT_EMAIL'),
                 }),
             );

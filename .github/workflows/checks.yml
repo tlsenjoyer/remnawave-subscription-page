@@ -25,7 +25,7 @@ jobs:
       - run: node scripts/generate-panel-config.mjs && git diff --exit-code -- config/tovarish-panel.json
       - run: npm run typecheck && npm run lint && npm test && npm run start:build
         working-directory: frontend
-      - run: npm run typecheck && npm run lint && NODE_ENV=production npm run build
+      - run: npm run typecheck && npm run lint && npm test && NODE_ENV=production npm run build
         working-directory: backend
       - run: npx playwright install --with-deps chromium
         working-directory: frontend

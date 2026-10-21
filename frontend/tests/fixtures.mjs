@@ -24,6 +24,7 @@ export function makeConfig(overrides = {}) {
 export function makeSubscription(overrides = {}) {
     const response = {
         isFound: true,
+        subscriptionCreatedAt: '2026-10-18T12:00:00.000Z',
         user: {
             shortUuid: 'demo',
             username: 'never-display-this-username',

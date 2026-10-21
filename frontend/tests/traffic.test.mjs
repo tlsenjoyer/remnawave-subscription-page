@@ -9,7 +9,7 @@ import {
 import {
     getTrafficMetrics,
     formatTrafficBytes,
-    formatExactBytes
+    formatTrafficMegabytes
 } from '../src/widgets/main/subscription-info/traffic.utils.ts'
 
 for (const [used, color, progress] of [
@@ -48,12 +48,13 @@ test('integer arithmetic preserves large counters and exact 80% boundary', () =>
     })
     assert.equal(result.progress, 80)
     assert.equal(result.color, 'yellow')
-    assert.match(formatExactBytes(result.used, 'en'), /8,000,000,000,000,000,000,000/)
 })
 test('localized units and decimal precision', () => {
     assert.equal(formatTrafficBytes(0n, 'ru'), '0\u00a0МБ')
-    assert.equal(formatTrafficBytes(25n * 1024n ** 3n, 'ru'), '25,0\u00a0ГБ')
-    assert.equal(formatTrafficBytes(25n * 1024n ** 3n, 'en'), '25.0\u00a0GB')
+    assert.equal(formatTrafficBytes(25n * 1024n ** 3n, 'ru'), '25\u00a0ГБ')
+    assert.equal(formatTrafficBytes(25n * 1024n ** 3n, 'en'), '25\u00a0GB')
+    assert.equal(formatTrafficBytes(1572864n, 'ru'), '1,5\u00a0МБ')
+    assert.equal(formatTrafficBytes(1572864n, 'en'), '1.5\u00a0MB')
 })
 test('every supported locale has translated UI copy and reset schedules', () => {
     for (const locale of LANGUAGE_CODES) {
@@ -87,6 +88,9 @@ test('dashboard translations cover every supported locale and fall back to Engli
             for (const key of [
                 'connect',
                 'deviceError',
+                'deleteDevice',
+                'deletingDevice',
+                'deleteDeviceError',
                 'deviceHint',
                 'privateLink',
                 'preparing',
@@ -138,4 +142,22 @@ test('importable panel configuration retains the schema and exact client matrix'
         assert.equal(config.platforms[platform].apps.filter((app) => app.featured).length, 1)
         for (const app of config.platforms[platform].apps) assert.equal(app.blocks.length, 3)
     }
+})
+
+test('monthly reset day comes from creation in UTC with safe fallback', () => {
+    for (const strategy of ['MONTH', 'MONTH_ROLLING']) {
+        assert.equal(getResetCaption(strategy, 'ru', '2026-10-18T23:30:00Z'), 'Сброс 18 числа ежемесячно')
+        assert.equal(getResetCaption(strategy, 'en', '2026-01-31T00:00:00Z'), 'Resets on day 31 of every month')
+        assert.equal(getResetCaption(strategy, 'en', 'invalid'), 'Resets monthly')
+    }
+    assert.equal(getResetCaption('DAY', 'en', '2026-10-18T00:00:00Z'), 'Resets daily')
+})
+test('tooltip always uses localized megabytes including small and unlimited counters', () => {
+    assert.equal(formatTrafficMegabytes(null, 'en'), '—')
+    assert.equal(formatTrafficMegabytes(0n, 'en'), '0')
+    assert.equal(formatTrafficMegabytes(1n, 'en'), '0')
+    assert.equal(formatTrafficMegabytes(1572864n, 'ru'), '1,5')
+    assert.equal(formatTrafficMegabytes(1700000n, 'en'), '1.6')
+    assert.equal(formatTrafficMegabytes(25000n * 1024n ** 2n, 'ru'), new Intl.NumberFormat('ru').format(25000))
+    assert.equal(formatTrafficMegabytes(25n * 1024n ** 3n, 'en'), '25,600')
 })

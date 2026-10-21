@@ -23,6 +23,11 @@
 .rowLabel, .rowEnd { display: flex; align-items: center; gap: 12px; }
 .rowLabel { font-weight: 500; }
 .rowLabel svg, .rowEnd { color: var(--text-secondary); }
+.deviceDetails { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.deleteDevice { flex-shrink: 0; color: hsl(var(--destructive)); font-size: 14px; font-weight: 500; min-height: 44px; }
+.deleteDevice:hover:not(:disabled) { text-decoration: underline; text-underline-offset: 3px; }
+.deleteDevice:disabled { color: var(--text-secondary); cursor: default; }
+:global([data-mantine-color-scheme='dark']) .deleteDevice:not(:disabled) { color: color-mix(in srgb, hsl(var(--destructive)), white 24%); }
 .supportCard { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 0 4px; color: var(--text-secondary); }
 .supportCard > svg { flex-shrink: 0; width: 20px; height: 20px; }
 .supportCard > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -89,7 +94,8 @@
 .stepHeading { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 28px; }
 .appSection { padding-top: 24px; border-top: 1px solid hsl(var(--border)); }
 .selectedApp > :global(.mantine-Button-root) { margin-inline-start: auto; }
-.appSection .instruction { margin-bottom: 0; }
+.stepContent .instruction:last-child { margin-bottom: 0; }
+.instructionText:last-child { margin-bottom: 0; }
 .chosenApp { margin-top: -12px; margin-bottom: 28px; }
 .successMark { order: 1; margin-inline-start: auto; display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; color: var(--text-accent); background: hsl(var(--primary) / 0.08); border-radius: 50%; }
 .wizardNavigation { display: flex; align-items: stretch; flex-wrap: wrap; gap: 12px; margin-top: 24px; }

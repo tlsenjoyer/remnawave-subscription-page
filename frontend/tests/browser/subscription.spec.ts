@@ -35,8 +35,9 @@ test('traffic remains accessible and username is absent', async ({ page }) => {
     await expect(page.getByText('Expiry date 8 April 2027', { exact: true })).toBeVisible()
     await expect(page.getByText('Active', { exact: true })).toHaveCount(1)
     await expect(page.getByRole('button', { name: 'Show details', exact: true })).toHaveCount(0)
-    await page.getByRole('button', { name: /Exact usage/ }).focus()
-    await expect(page.getByText('0 / 26,843,545,600', { exact: true })).toBeVisible()
+    await expect(page.getByText('Resets on day 18 of every month')).toBeVisible()
+    await page.getByRole('button', { name: /Exact usage \(MB\)/ }).focus()
+    await expect(page.getByText('0 / 25,600', { exact: true })).toBeVisible()
 })
 for (const status of ['ACTIVE', 'EXPIRED', 'LIMITED', 'DISABLED'])
     test(`explicit ${status} status and exhausted traffic`, async ({ page }) => {
@@ -103,7 +104,7 @@ test('main page copy and QR, completion, nested support and reopen', async ({ pa
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
     await openPage(page)
     const link = page.getByRole('textbox', { name: 'Copy subscription link', exact: true })
-    await expect(link).toHaveValue('http://127.0.0.1:3334/demo')
+    await expect(link).toHaveValue(page.url())
     await page.getByRole('button', { name: 'Copy subscription link', exact: true }).click()
     await expect
         .poll(() => page.evaluate(() => navigator.clipboard.readText()))
@@ -122,7 +123,7 @@ test('main page copy and QR, completion, nested support and reopen', async ({ pa
     await dialog.getByRole('button', { name: 'Continue' }).click()
     await expect(dialog.getByRole('link', { name: 'Add to incy', exact: true })).toHaveAttribute(
         'href',
-        'incy://import/http://127.0.0.1:3334/demo'
+        `incy://import/${page.url()}`
     )
     await expect(
         dialog.getByRole('button', { name: 'Copy subscription link', exact: true })
@@ -167,7 +168,7 @@ test('query imports encode the complete subscription URL', async ({ page }) => {
     await dialog.getByRole('button', { name: 'Continue' }).click()
     await expect(dialog.getByRole('link', { name: 'Add to Koala Clash' })).toHaveAttribute(
         'href',
-        'koala-clash://install-config?url=http%3A%2F%2F127.0.0.1%3A3334%2Fdemo'
+        `koala-clash://install-config?url=${encodeURIComponent(page.url())}`
     )
 })
 for (const locale of ['en', 'ru'])
@@ -224,6 +225,7 @@ for (const result of ['ok', 'empty', 'error', 'expired'])
                             ? []
                             : [
                                   {
+                                      id: 'test-phone-hwid',
                                       deviceModel: 'Test phone',
                                       platform: 'Android',
                                       osVersion: '16',
@@ -253,7 +255,7 @@ test('Russian unlimited and indefinite expiry', async ({ page }) => {
         user: { trafficLimitBytes: '0', expiresAt: '2099-01-01T00:00:00Z' }
     })
     await expect(page.getByText('Безлимитный трафик')).toBeVisible()
-    await expect(page.getByText('Сброс ежемесячно')).toBeVisible()
+    await expect(page.getByText('Сброс 18 числа ежемесячно')).toBeVisible()
     await expect(page.getByText('Бессрочно')).toBeVisible()
 })
 test('mobile/tablet/desktop: primary action, platforms, RTL and reduced motion', async ({
@@ -299,7 +301,7 @@ test('touch traffic tooltip, QR popup and wizard', async ({ browser }) => {
     const page = await context.newPage()
     await openPage(page)
     await page.getByRole('button', { name: /Exact usage/ }).tap()
-    await expect(page.getByText('0 / 26,843,545,600', { exact: true })).toBeVisible()
+    await expect(page.getByText('0 / 25,600', { exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Show QR code', exact: true }).tap()
     await expect(page.getByRole('dialog', { name: 'Show QR code', exact: true })).toBeVisible()
     await page.keyboard.press('Escape')
@@ -600,6 +602,7 @@ for (const width of [390, 1280])
                     limit: 5,
                     devices: [
                         {
+                            id: 'test-phone-hwid',
                             deviceModel: 'Test phone',
                             platform: 'Android',
                             osVersion: '16',
@@ -614,6 +617,7 @@ for (const width of [390, 1280])
         const dialog = page.getByRole('dialog', { name: 'Your devices', exact: true })
         await expect(dialog.getByText('Test phone')).toBeVisible()
         const refresh = dialog.getByRole('button', { name: 'Try again', exact: true })
+        await expect(dialog).toHaveCSS('opacity', '1')
         let previousStatus = 200
         for (const nextStatus of [200, 503, 200]) {
             await refresh.click({ trial: true })
@@ -624,7 +628,7 @@ for (const width of [390, 1280])
             status = nextStatus
             await refresh.click()
             await expect(refresh).toBeDisabled()
-            await expect(dialog.locator('[aria-busy="true"]')).toBeVisible()
+            await expect(dialog.locator('div[aria-busy="true"]')).toBeVisible()
             expect(await dialog.boundingBox()).toEqual(before)
             await expect(dialog.getByText('Test phone')).toHaveCount(previousStatus === 200 ? 1 : 0)
             await expect(dialog.getByRole('status')).toHaveCount(0)
@@ -632,7 +636,7 @@ for (const width of [390, 1280])
                 await page.screenshot({ path: info.outputPath('refresh-pending.png') })
             release()
             await expect(refresh).toBeEnabled()
-            await expect(dialog.locator('[aria-busy="false"]')).toBeVisible()
+            await expect(dialog.locator('div[aria-busy="false"]')).toBeVisible()
             if (nextStatus === 503) await expect(dialog.getByText(/We couldn’t load/)).toBeVisible()
             else {
                 await expect(dialog.getByText('Test phone')).toBeVisible()
@@ -648,6 +652,10 @@ for (const width of [390, 1280])
             await page.setViewportSize({ width, height: 1000 })
             await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
             await openPage(page)
+            await page.getByRole('button', { name: /Exact usage \(MB\)/ }).hover()
+            await expect(page.getByText('0 / 25,600', { exact: true })).toBeVisible()
+            await page.screenshot({ path: info.outputPath('summary.png'), fullPage: true })
+            await page.mouse.move(0, 0)
             const buttonText = await page
                 .getByRole('button', { name: 'Connect a device', exact: true })
                 .evaluate((el) => {
@@ -731,6 +739,11 @@ for (const width of [390, 1280])
                     })
                 if (frame) await expect.poll(metrics).toEqual(frame)
                 else frame = await metrics()
+                const bottomGap = await panel.evaluate((el) => {
+                    const content = el.querySelector('section:last-child > :last-child') || el.firstElementChild!.lastElementChild!
+                    return el.getBoundingClientRect().bottom - content.getBoundingClientRect().bottom
+                })
+                expect(bottomGap).toBe(width === 390 ? 25 : 33)
                 const header = dialog.locator('header')
                 const headerBounds = (await header.boundingBox())!
                 const modalTitle = header.getByRole('heading', { name: 'Connection setup' })
@@ -810,5 +823,167 @@ test('import has no manual fallback disclosure', async ({ page }) => {
     const dialog = await wizard(page)
     await dialog.getByRole('button', { name: 'Continue', exact: true }).click()
     await expect(dialog.locator('details')).toHaveCount(0)
-    await expect(dialog.getByRole('textbox', { name: 'Copy subscription link', exact: true })).toHaveCount(0)
+    await expect(
+        dialog.getByRole('textbox', { name: 'Copy subscription link', exact: true })
+    ).toHaveCount(0)
 })
+
+for (const theme of ['light', 'dark'] as const)
+    for (const width of [390, 1280])
+        test(`device deletion ${theme} ${width}`, async ({ page }, info) => {
+            await page.setViewportSize({ width, height: 900 })
+            await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
+            await openPage(page, { locale: 'ru' })
+            const device = {
+                id: 'windows-pc-hwid',
+                deviceModel: 'Windows 11 PC',
+                platform: 'Windows',
+                osVersion: '11',
+                createdAt: '2026-10-01T12:00:00.000Z',
+                updatedAt: '2026-10-18T12:00:00.000Z'
+            }
+            let deletes = 0
+            let release = () => {}
+            await page.route('**/api/devices', async (route) => {
+                if (route.request().method() === 'DELETE') {
+                    deletes++
+                    expect(route.request().headers()['x-subscription-id']).toBe('demo')
+                    expect(route.request().postDataJSON()).toEqual({ id: device.id })
+                    await new Promise<void>((resolve) => {
+                        release = resolve
+                    })
+                    await route.fulfill({ json: { total: 0, limit: 5, devices: [] } })
+                } else await route.fulfill({ json: { total: 1, limit: 5, devices: [device] } })
+            })
+            page.on('dialog', () => {
+                throw new Error('Deletion must not open a confirmation dialog')
+            })
+            await page.getByRole('button', { name: 'Ваши устройства', exact: true }).click()
+            const dialog = page.getByRole('dialog', { name: 'Ваши устройства', exact: true })
+            const remove = dialog.getByRole('button', { name: 'Удалить', exact: true })
+            await expect(remove).toBeVisible()
+            await expect(remove).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+            await expect(remove).toHaveCSS('border-style', 'none')
+            await expect(remove).toHaveCSS('text-decoration-line', 'none')
+            await remove.hover()
+            await expect(remove).toHaveCSS('text-decoration-line', 'underline')
+            const bounds = await remove.boundingBox()
+            expect(bounds!.width).toBeGreaterThan(24)
+            expect(bounds!.height).toBeGreaterThanOrEqual(44)
+            expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width)
+            await page.screenshot({ path: info.outputPath('devices.png'), fullPage: true })
+            await remove.focus()
+            await page.keyboard.press('Enter')
+            await expect.poll(() => deletes).toBe(1)
+            const deleting = dialog.getByRole('button', { name: 'Удаление...', exact: true })
+            await expect(deleting).toBeDisabled()
+            await expect(deleting).toHaveAttribute('aria-busy', 'true')
+            await expect(dialog.getByText('Windows 11 PC', { exact: true })).toBeVisible()
+            await expect(
+                dialog.getByRole('button', { name: 'Обновить', exact: true })
+            ).toBeDisabled()
+            await page.screenshot({ path: info.outputPath('deleting.png'), fullPage: true })
+            release()
+            await expect(dialog.getByText('Зарегистрированных устройств пока нет')).toBeVisible()
+            await expect(dialog.getByRole('heading', { name: '0 / 5', exact: true })).toBeVisible()
+            await expect(remove).toHaveCount(0)
+            await expect(
+                dialog.getByRole('button', { name: 'Обновить', exact: true })
+            ).toBeFocused()
+            expect(deletes).toBe(1)
+            await page.keyboard.press('Escape')
+            await expect(page.getByRole('button', { name: /^Ваши устройства/ })).toBeFocused()
+        })
+
+for (const [locale, width, devicesLabel, deleteLabel, pendingLabel, retryLabel] of [
+    ['en', 1280, 'Your devices', 'Delete', 'Deleting...', 'Try again'],
+    ['ru', 390, 'Ваши устройства', 'Удалить', 'Удаление...', 'Обновить']
+] as const)
+    test(`device deletion preserves scroll position in ${locale}`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 })
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        await openPage(page, { locale })
+        const devices = Array.from({ length: 20 }, (_, index) => ({
+            id: `device-${index}`,
+            deviceModel: `Phone ${index}`,
+            platform: 'Android',
+            osVersion: '16',
+            createdAt: '2026-01-01T00:00:00Z',
+            updatedAt: '2026-10-01T00:00:00Z'
+        }))
+        let release = () => {}
+        await page.route('**/api/devices', async (route) => {
+            let remaining = devices
+            if (route.request().method() === 'DELETE') {
+                const { id } = route.request().postDataJSON()
+                await new Promise<void>((resolve) => {
+                    release = resolve
+                })
+                remaining = devices.filter((device) => device.id !== id)
+            }
+            await route.fulfill({
+                json: { total: remaining.length, limit: 25, devices: remaining }
+            })
+        })
+        await page.getByRole('button', { name: devicesLabel, exact: true }).click()
+        const dialog = page.getByRole('dialog', { name: devicesLabel, exact: true })
+        await dialog.getByRole('button', { name: deleteLabel, exact: true }).nth(6).click()
+        await expect(dialog.getByRole('button', { name: pendingLabel, exact: true })).toBeDisabled()
+        const before = await dialog.evaluate((el) => el.scrollTop)
+        expect(before).toBeGreaterThan(0)
+        expect(
+            await dialog.evaluate((el) => el.scrollHeight - el.clientHeight - el.scrollTop)
+        ).toBeGreaterThan(1000)
+        release()
+        await expect(dialog.getByText('Phone 6', { exact: true })).toHaveCount(0)
+        await expect(dialog.getByRole('button', { name: retryLabel, exact: true })).toBeFocused()
+        expect(await dialog.evaluate((el) => el.scrollTop)).toBeCloseTo(before, 0)
+        await expect(dialog.getByRole('button', { name: pendingLabel, exact: true })).toHaveCount(0)
+    })
+
+for (const failure of ['permission', 'expired', 'network'])
+    test(`device deletion failure ${failure} preserves the device`, async ({ page }) => {
+        await openPage(page)
+        let failed = true
+        await page.route('**/api/devices', async (route) => {
+            if (route.request().method() === 'DELETE') {
+                if (failure === 'network' && failed) return route.abort()
+                return route.fulfill({
+                    status: failed ? (failure === 'expired' ? 401 : 503) : 200,
+                    json: { total: 0, limit: 5, devices: [] }
+                })
+            }
+            return route.fulfill({
+                json: {
+                    total: 1,
+                    limit: 5,
+                    devices: [
+                        {
+                            id: 'phone',
+                            deviceModel: 'Test phone',
+                            platform: 'Android',
+                            osVersion: '16',
+                            createdAt: '2026-01-01T00:00:00Z',
+                            updatedAt: '2026-10-01T00:00:00Z'
+                        }
+                    ]
+                }
+            })
+        })
+        await page.getByRole('button', { name: 'Your devices', exact: true }).click()
+        const dialog = page.getByRole('dialog', { name: 'Your devices', exact: true })
+        const remove = dialog.getByRole('button', { name: 'Delete', exact: true })
+        await remove.click()
+        await expect(dialog.getByText('Test phone')).toBeVisible()
+        await expect(dialog.getByRole('heading', { name: '1 / 5', exact: true })).toBeVisible()
+        if (failure === 'expired') {
+            await expect(dialog.getByRole('button', { name: 'Reload page' })).toBeVisible()
+            await expect(remove).toBeDisabled()
+        } else {
+            await expect(dialog.getByText(/We couldn’t delete this device/)).toBeVisible()
+            await expect(remove).toBeEnabled()
+            failed = false
+            await remove.click()
+            await expect(dialog.getByText('No registered devices yet')).toBeVisible()
+        }
+    })

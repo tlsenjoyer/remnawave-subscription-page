@@ -1,7 +1,7 @@
 process.title = 'rw-subpage';
 
 import cookieParser from 'cookie-parser';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, json } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
@@ -92,7 +92,8 @@ async function bootstrap(): Promise<void> {
 
     app.use('/assets', cookieParser());
     const devicesPrefix = config.get('CUSTOM_SUB_PREFIX');
-    app.use(`${devicesPrefix ? '/' + devicesPrefix : ''}/api/devices`, cookieParser());
+    // Parse device mutations before the header filter removes body framing headers.
+    app.use(`${devicesPrefix ? '/' + devicesPrefix : ''}/api/devices`, cookieParser(), json());
     app.use('/assets', checkAssetsCookieMiddleware);
 
     app.use(noRobotsMiddleware, getRealIp, headerFilterMiddleware);

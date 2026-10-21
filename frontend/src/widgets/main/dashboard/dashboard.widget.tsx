@@ -75,6 +75,7 @@ interface DeviceList {
     total: number
     limit: number | null
     devices: {
+        id: string
         platform: string | null
         osVersion: string | null
         deviceModel: string | null
@@ -114,9 +115,13 @@ export function DashboardWidget({
     const [support, setSupport] = useState(false)
     const [devicesOpen, setDevicesOpen] = useState(false)
     const [devices, setDevices] = useState<DeviceList | null>(null)
-    const [deviceError, setDeviceError] = useState<'expired' | 'unavailable' | null>(null)
+    const [deviceError, setDeviceError] = useState<'expired' | 'unavailable' | 'delete' | null>(
+        null
+    )
     const [loading, setLoading] = useState(false)
+    const [deleting, setDeleting] = useState<string | null>(null)
     const deviceRequest = useRef(0)
+    const refreshDevices = useRef<HTMLButtonElement>(null)
     const connectTrigger = useRef<HTMLButtonElement>(null)
     const stepHeading = useRef<HTMLHeadingElement>(null)
     const subscriptionUrl = constructSubscriptionUrl(
@@ -202,7 +207,7 @@ export function DashboardWidget({
                     className={classes.instructionText}
                     dangerouslySetInnerHTML={{ __html: t(block.description) }}
                 />
-                <Stack gap="sm">{buttons(block.buttons)}</Stack>
+                {block.buttons.length > 0 && <Stack gap="sm">{buttons(block.buttons)}</Stack>}
             </section>
         ))
     const contactButtons = (
@@ -226,36 +231,55 @@ export function DashboardWidget({
             </Button>
         </Stack>
     )
-    const loadDevices = async () => {
+    const loadDevices = async (deviceId?: string) => {
         const id = ++deviceRequest.current
-        setLoading(true)
+        if (deviceId === undefined) setLoading(true)
+        else setDeleting(deviceId)
         try {
             const base = new URL(subscriptionUrl)
             base.pathname = base.pathname.replace(/\/[^/]+\/?$/, '/api/devices')
             const response = await fetch(base, {
                 credentials: 'same-origin',
-                headers: { 'X-Subscription-Id': subscription.user.shortUuid },
+                method: deviceId === undefined ? 'GET' : 'DELETE',
+                headers: {
+                    'X-Subscription-Id': subscription.user.shortUuid,
+                    ...(deviceId === undefined ? {} : { 'Content-Type': 'application/json' })
+                },
+                body: deviceId === undefined ? undefined : JSON.stringify({ id: deviceId }),
                 cache: 'no-store',
                 signal: AbortSignal.timeout(15000)
             })
             if (id !== deviceRequest.current) return
             if (!response.ok) {
-                setDevices(null)
-                setDeviceError(response.status === 401 ? 'expired' : 'unavailable')
+                if (deviceId === undefined) setDevices(null)
+                setDeviceError(
+                    response.status === 401
+                        ? 'expired'
+                        : deviceId === undefined
+                          ? 'unavailable'
+                          : 'delete'
+                )
                 return
             }
             const data: DeviceList = await response.json()
             if (id === deviceRequest.current) {
                 setDevices(data)
                 setDeviceError(null)
+                if (deviceId !== undefined) {
+                    requestAnimationFrame(() => {
+                        if (id === deviceRequest.current)
+                            refreshDevices.current?.focus({ preventScroll: true })
+                    })
+                }
             }
         } catch {
             if (id === deviceRequest.current) {
-                setDevices(null)
-                setDeviceError('unavailable')
+                if (deviceId === undefined) setDevices(null)
+                setDeviceError(deviceId === undefined ? 'unavailable' : 'delete')
             }
         } finally {
             if (id === deviceRequest.current) setLoading(false)
+            if (deviceId !== undefined) setDeleting(null)
         }
     }
     const date = (value: string) =>
@@ -548,7 +572,7 @@ export function DashboardWidget({
                 size="lg"
                 closeButtonProps={{ 'aria-label': c.close }}
             >
-                <Stack gap="lg" aria-busy={loading}>
+                <Stack gap="lg" aria-busy={loading || deleting !== null}>
                     <Text c="dimmed" size="sm">
                         {c.deviceHint}
                     </Text>
@@ -561,12 +585,17 @@ export function DashboardWidget({
                     {deviceError && (
                         <Alert color="yellow">
                             <Text>
-                                {deviceError === 'expired' ? c.sessionExpired : c.deviceError}
+                                {deviceError === 'expired'
+                                    ? c.sessionExpired
+                                    : deviceError === 'delete'
+                                      ? c.deleteDeviceError
+                                      : c.deviceError}
                             </Text>
                             <Button
                                 mt="sm"
                                 variant="light"
                                 loading={loading}
+                                disabled={deleting !== null}
                                 onClick={() =>
                                     deviceError === 'expired'
                                         ? window.location.reload()
@@ -598,11 +627,11 @@ export function DashboardWidget({
                             {devices.devices.length === 0 ? (
                                 <Text>{c.empty}</Text>
                             ) : (
-                                devices.devices.map((device, index) => (
-                                    <Card p="md" key={index}>
+                                devices.devices.map((device) => (
+                                    <Card p="md" key={device.id}>
                                         <Group wrap="nowrap">
-                                            <IconDevices size={24} />
-                                            <div>
+                                            <IconDevices size={24} style={{ flexShrink: 0 }} />
+                                            <div className={classes.deviceDetails}>
                                                 <Text fw={600}>
                                                     {device.deviceModel ||
                                                         device.platform ||
@@ -619,13 +648,29 @@ export function DashboardWidget({
                                                     {c.updatedAt}: {date(device.updatedAt)}
                                                 </Text>
                                             </div>
+                                            <UnstyledButton
+                                                className={classes.deleteDevice}
+                                                disabled={
+                                                    loading ||
+                                                    deleting !== null ||
+                                                    deviceError === 'expired'
+                                                }
+                                                aria-busy={deleting === device.id}
+                                                onClick={() => void loadDevices(device.id)}
+                                            >
+                                                {deleting === device.id
+                                                    ? c.deletingDevice
+                                                    : c.deleteDevice}
+                                            </UnstyledButton>
                                         </Group>
                                     </Card>
                                 ))
                             )}
                             <Button
+                                ref={refreshDevices}
                                 variant="light"
                                 loading={loading}
+                                disabled={deleting !== null}
                                 onClick={() => void loadDevices()}
                             >
                                 {c.retry}

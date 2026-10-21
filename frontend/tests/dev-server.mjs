@@ -20,6 +20,7 @@ const server = await createServer({
                                 {
                                     platform: 'Windows',
                                     osVersion: '11',
+                                    id: 'windows-pc-hwid',
                                     deviceModel: 'Windows PC',
                                     createdAt: '2026-10-01T12:00:00.000Z',
                                     updatedAt: '2026-10-18T12:00:00.000Z'

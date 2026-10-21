@@ -27,10 +27,10 @@ import { useSubscription } from '@entities/subscription-info-store'
 import { getDashboardCopy } from '../dashboard/dashboard-copy'
 import { getResetCaption, getTrafficCopy } from './traffic-copy'
 import classes from './traffic-summary.module.css'
-import { formatExactBytes, formatTrafficBytes, getTrafficMetrics } from './traffic.utils'
+import { formatTrafficMegabytes, formatTrafficBytes, getTrafficMetrics } from './traffic.utils'
 
 export function TrafficSummaryWidget() {
-    const { user, planName } = useSubscription()
+    const { user, planName, subscriptionCreatedAt } = useSubscription()
     const { t, currentLang, baseTranslations } = useTranslation()
     const [exactOpen, setExactOpen] = useState(false)
     const [qrOpen, setQrOpen] = useState(false)
@@ -54,7 +54,7 @@ export function TrafficSummaryWidget() {
     }[user.userStatus]
     const StatusIcon = status.icon
     const usage = `${formatTrafficBytes(traffic.used, currentLang)} / ${traffic.unlimited ? '∞' : formatTrafficBytes(traffic.limit, currentLang)}`
-    const exact = `${formatExactBytes(traffic.used, currentLang)} / ${traffic.unlimited ? '∞' : formatExactBytes(traffic.limit, currentLang)}`
+    const exact = `${formatTrafficMegabytes(traffic.used, currentLang)} / ${traffic.unlimited ? '∞' : formatTrafficMegabytes(traffic.limit, currentLang)}`
     const statusBadge = (
         <Badge color={status.color} leftSection={<StatusIcon size={12} />} variant="light">
             {status.text}
@@ -100,7 +100,7 @@ export function TrafficSummaryWidget() {
                         <Popover.Target>
                             <UnstyledButton
                                 className={classes.amount}
-                                aria-label={`${labels.exact}: ${usage}`}
+                                aria-label={`${labels.exact}: ${exact}`}
                                 onMouseEnter={() => setExactOpen(true)}
                                 onMouseLeave={() => setExactOpen(false)}
                                 onFocus={() => setExactOpen(true)}
@@ -139,7 +139,7 @@ export function TrafficSummaryWidget() {
                     />
                 </div>
                 <Text c="dimmed" size="xs" mt="sm">
-                    {getResetCaption(user.trafficLimitStrategy, currentLang)}
+                    {getResetCaption(user.trafficLimitStrategy, currentLang, subscriptionCreatedAt)}
                 </Text>
                 <div className={classes.linkControls}>
                     <div className={classes.linkRow}>
