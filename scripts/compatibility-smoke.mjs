@@ -103,7 +103,10 @@ try {
     assert.equal(webpage.status, 200)
     const html = await webpage.text()
     const embedded = JSON.parse(Buffer.from(html.match(/data-panel="([^"]+)"/)[1], 'base64').toString())
-    assert.deepEqual(embedded, subscription, 'browser hydration payload unchanged')
+    assert.deepEqual(embedded, {
+        ...subscription,
+        response: { ...subscription.response, subscriptionCreatedAt: '2026-01-01T00:00:00.000Z' }
+    }, 'browser hydration retains subscription fields and uses the verified panel creation date')
     assert.ok(webpage.headers.get('x-robots-tag').includes('noindex'))
     const cookie = webpage.headers.getSetCookie().find(value => value.startsWith('session='))
     assert.ok(cookie.includes('HttpOnly'))
