@@ -1,13 +1,13 @@
 # Товарищ VPN subscription page
 
-A compact green subscription dashboard and guided connection flow for Remnawave. Fork release **v2.2.0**; the embedded upstream compatibility version remains **8.0.0**. Existing subscription routes, payloads, panel configuration schema, forwarding, and configuration-session behavior are retained. A separate authenticated device API supports listing and deleting registered devices.
+A compact green subscription dashboard and guided connection flow for Remnawave. Fork release **v2.2.1**; the embedded upstream compatibility version remains **8.0.0**. Existing subscription routes, payloads, panel configuration schema, forwarding, and configuration-session behavior are retained. A separate authenticated device API supports listing and deleting registered devices.
 
 ## Deployment
 
 Public AMD64 and ARM64 image:
 
 ```text
-ghcr.io/tlsenjoyer/remnawave-subscription-page:v2.2.0
+ghcr.io/tlsenjoyer/remnawave-subscription-page:v2.2.1
 ```
 
 1. Copy `.env.sample` to `.env`. Set `REMNAWAVE_PANEL_URL`, `REMNAWAVE_API_TOKEN`, and `SUPPORT_EMAIL=support@tovarish.net`.
@@ -166,7 +166,7 @@ References: [Docker multi-platform builds](https://docs.docker.com/build/buildin
 
 ## Release and rollback
 
-PRs and main run validation. Stable `vX.Y.Z` tags publish AMD64/ARM64 manifests to GHCR using `GITHUB_TOKEN`; the tag must match `RELEASE_VERSION`. v2.2.0 and `latest` use the same release image. The upstream embedded compatibility version remains independent. Verify the public manifest and an anonymous pull after publication.
+PRs and main run validation. Stable `vX.Y.Z` tags publish AMD64/ARM64 manifests to GHCR using `GITHUB_TOKEN`; the tag must match `RELEASE_VERSION`. v2.2.1 and `latest` use the same release image. The upstream embedded compatibility version remains independent. Verify the public manifest and an anonymous pull after publication.
 
 Keep the v1.0.0 image and your old panel configuration for rollback. Restore both, then recreate/restart the container. No database migration is introduced. Health and startup logs confirm readiness; device failures remain visible in the modal with retry and support.
 

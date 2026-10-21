@@ -33,6 +33,7 @@ import {
     IconWifi
 } from '@tabler/icons-react'
 import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { FaAndroid, FaApple, FaLinux, FaWindows } from 'react-icons/fa6'
 
 import { useTranslation } from '@shared/hooks'
@@ -266,10 +267,9 @@ export function DashboardWidget({
                 setDevices(data)
                 setDeviceError(null)
                 if (deviceId !== undefined) {
-                    requestAnimationFrame(() => {
-                        if (id === deviceRequest.current)
-                            refreshDevices.current?.focus({ preventScroll: true })
-                    })
+                    // Enable the focus target before restoring keyboard focus.
+                    flushSync(() => setDeleting(null))
+                    refreshDevices.current?.focus({ preventScroll: true })
                 }
             }
         } catch {
